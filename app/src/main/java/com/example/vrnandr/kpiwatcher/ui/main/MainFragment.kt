@@ -9,13 +9,11 @@ import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.*
 import android.widget.Toast
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.vrnandr.kpiwatcher.database.KpiDatabase
+import com.example.vrnandr.kpiwatcher.KpiApplication
+import com.example.vrnandr.kpiwatcher.repository.database.KpiDatabase
 import com.example.vrnandr.kpiwatcher.databinding.MainFragmentBinding
-
-import com.example.vrnandr.kpiwatcher.R
 
 class MainFragment : Fragment() {
 
@@ -27,10 +25,12 @@ class MainFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        val application = requireNotNull(this.activity).application
-        val dataSource = KpiDatabase.getInstance(application).kpiDao
-        val viewModelFactory = MainModelFactory(dataSource, application)
+        //val application = requireNotNull(this.activity).application
+        //val dataSource = KpiDatabase.getInstance(application).kpiDao
+
+        val viewModelFactory = MainModelFactory((requireNotNull(this.activity).application as KpiApplication).repositiry)
         val viewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
+
 
         val binding = MainFragmentBinding.inflate(inflater)
 

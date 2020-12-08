@@ -1,12 +1,10 @@
 package com.example.vrnandr.kpiwatcher.ui.main
 
-import android.app.Application
 import android.util.Log
 import android.view.View
 import androidx.lifecycle.*
-import com.example.vrnandr.kpiwatcher.database.Kpi
-import com.example.vrnandr.kpiwatcher.network.Api
-import com.example.vrnandr.kpiwatcher.database.KpiDao
+import com.example.vrnandr.kpiwatcher.repository.Repository
+import com.example.vrnandr.kpiwatcher.repository.database.Kpi
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 import retrofit2.Call
@@ -14,7 +12,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 @Suppress("UNUSED_PARAMETER")
-class MainViewModel(val dao: KpiDao, application : Application) : AndroidViewModel(application) {
+class MainViewModel(val repo: Repository) :ViewModel() {
 
     private val _response = MutableLiveData<String>()
     val response: LiveData<String>
@@ -32,19 +30,19 @@ class MainViewModel(val dao: KpiDao, application : Application) : AndroidViewMod
     val showErrorToast: LiveData<String>
         get() = _showErrorToast
 
-    val currentKpi : LiveData<Kpi> = dao.getCurrentKPE()
+    val currentKpi : LiveData<Kpi> = repo.currentKPI
 
     fun onKPIButtonClick (view : View){
         kpiRequest()
     }
 
-    private val api = Api(getApplication())
+//    private val api = Api(getApplication())
 
     private var reopenLoginPage = true
     private var _csrf:String =""
     fun openLoginPage() {
-        api.clearCookies()
-        api.retrofitService.login().enqueue(object : Callback<String> {
+        repo.clearCookies()
+        repo.api.retrofitService.login().enqueue(object : Callback<String> {
             override fun onFailure(call: Call<String>, t: Throwable) {
                 _showErrorToast.value = "Failure on open login page:"+t.message
             }
@@ -72,7 +70,7 @@ class MainViewModel(val dao: KpiDao, application : Application) : AndroidViewMod
     }
 
     fun login() {
-        api.retrofitService.loginrequest(_csrf,"0000001091","ВАРАНКИНАНДРЕЙАЛЕКСЕЕВИЧ","1").enqueue(object :
+        repo.api.retrofitService.loginrequest(_csrf,"0000001091","ВАРАНКИНАНДРЕЙАЛЕКСЕЕВИЧ","1").enqueue(object :
             Callback<String> {
             override fun onFailure(call: Call<String>, t: Throwable) {
                 _showErrorToast.value = "Failure on login:"+t.message
@@ -98,7 +96,7 @@ class MainViewModel(val dao: KpiDao, application : Application) : AndroidViewMod
     }
 
     fun kpiRequest(){
-        api.retrofitService.dashboard().enqueue(object : Callback<String> {
+        repo.api.retrofitService.dashboard().enqueue(object : Callback<String> {
             override fun onResponse(call: Call<String>, response: Response<String>) {
                 if (response.isSuccessful){
                     val result :String? = response.body()
@@ -115,11 +113,11 @@ class MainViewModel(val dao: KpiDao, application : Application) : AndroidViewMod
                             if (data.count()==names.count()){
                                 for ( i in 0 until data.count())
                                     kpiString +="${data[i]} ${color[i]} ${names[i]}:"
-                                val kpi = Kpi(System.currentTimeMillis(), kpiString.dropLast(1))
-                                Log.d("my", "onResponse: $currentKpi")
-                                viewModelScope.launch {
-                                    dao.insert(kpi)
-                                }
+                                val kpi = Kpi(System.currentTimeMillis(),"0000001091", kpiString.dropLast(1))
+                                if (kpiString.isNotEmpty())
+                                    viewModelScope.launch {
+                                        repo.addKpi(kpi)
+                                    }
                             }
                             _responseKPE.value = "$who\n$about"
                         }catch (i: IndexOutOfBoundsException){

@@ -1,4 +1,4 @@
-package com.example.vrnandr.kpiwatcher.network
+package com.example.vrnandr.kpiwatcher.repository.network
 
 import android.app.Application
 import android.content.Context
@@ -13,6 +13,7 @@ import retrofit2.http.Headers
 private const val BASE_URL = "http://oskinfotrans.ru/infoportal/"
 private const val PREF = "cookiesName"
 private const val DOMAIN = "domain"
+private const val COOKIE = "cookie"
 
 interface NetworkApi {
     @GET ("index.php?r=site%2Flogin")
@@ -47,12 +48,12 @@ class Api(val application: Application) {
         retrofit.create(NetworkApi::class.java) }
 
     fun clearCookies(){
-        application.getSharedPreferences("Cookie", Context.MODE_PRIVATE).edit().clear().apply()
+        application.getSharedPreferences(COOKIE, Context.MODE_PRIVATE).edit().clear().apply()
     }
 }
 
 class SessionCookieJar (val application: Application): CookieJar{
-    private val sp = application.getSharedPreferences("Cookie", Context.MODE_PRIVATE)
+    private val sp = application.getSharedPreferences(COOKIE, Context.MODE_PRIVATE)
     private val speditor = sp.edit()
     override fun saveFromResponse(url: HttpUrl, cookies: MutableList<Cookie>) {
         //TODO костыли [0]

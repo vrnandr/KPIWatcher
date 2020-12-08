@@ -1,4 +1,4 @@
-package com.example.vrnandr.kpiwatcher.database
+package com.example.vrnandr.kpiwatcher.repository.database
 
 import android.content.Context
 import androidx.room.Database
@@ -19,7 +19,7 @@ abstract class KpiDatabase: RoomDatabase(){
 
                 if (instance == null) {
                     instance = Room.databaseBuilder(
-                        context.applicationContext,
+                        context,
                         KpiDatabase::class.java,
                         "kpi_database"
                     )
