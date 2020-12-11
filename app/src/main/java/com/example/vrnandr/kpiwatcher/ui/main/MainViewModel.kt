@@ -12,7 +12,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 @Suppress("UNUSED_PARAMETER")
-class MainViewModel(val repo: Repository) :ViewModel() {
+class MainViewModel() :ViewModel() {
 
     private val _response = MutableLiveData<String>()
     val response: LiveData<String>
@@ -30,6 +30,7 @@ class MainViewModel(val repo: Repository) :ViewModel() {
     val showErrorToast: LiveData<String>
         get() = _showErrorToast
 
+    val repo = Repository.get()
     val currentKpi : LiveData<Kpi> = repo.currentKPI
 
     fun onKPIButtonClick (view : View){

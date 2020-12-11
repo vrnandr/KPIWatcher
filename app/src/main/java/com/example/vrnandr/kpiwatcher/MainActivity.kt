@@ -2,9 +2,10 @@ package com.example.vrnandr.kpiwatcher
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.example.vrnandr.kpiwatcher.ui.main.DetailFragment
 import com.example.vrnandr.kpiwatcher.ui.main.MainFragment
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), MainFragment.Callbacks {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -14,5 +15,12 @@ class MainActivity : AppCompatActivity() {
                     .replace(R.id.container, MainFragment.newInstance())
                     .commitNow()
         }
+    }
+
+    override fun showDetail() {
+        supportFragmentManager.beginTransaction()
+                .replace(R.id.container, DetailFragment.newInstance())
+                .addToBackStack(null)
+                .commit()
     }
 }

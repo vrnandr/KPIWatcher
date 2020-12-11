@@ -1,5 +1,6 @@
 package com.example.vrnandr.kpiwatcher.ui.main
 
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Spannable
@@ -11,28 +12,35 @@ import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.vrnandr.kpiwatcher.KpiApplication
-import com.example.vrnandr.kpiwatcher.repository.database.KpiDatabase
 import com.example.vrnandr.kpiwatcher.databinding.MainFragmentBinding
 
 class MainFragment : Fragment() {
 
+    private lateinit var binding: MainFragmentBinding
+    private var callbacks: Callbacks? = null
+    private val viewModel: MainViewModel by lazy { ViewModelProvider(this).get(MainViewModel::class.java) }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        callbacks = context as Callbacks
+    }
+
     companion object {
         fun newInstance() = MainFragment()
     }
+    interface Callbacks {
+        fun showDetail()
+    }
 
-    //private lateinit var viewModel: MainViewModel
+    override fun onDetach() {
+        super.onDetach()
+        callbacks = null
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        //val application = requireNotNull(this.activity).application
-        //val dataSource = KpiDatabase.getInstance(application).kpiDao
 
-        val viewModelFactory = MainModelFactory((requireNotNull(this.activity).application as KpiApplication).repositiry)
-        val viewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
-
-
-        val binding = MainFragmentBinding.inflate(inflater)
+        binding = MainFragmentBinding.inflate(inflater)
 
         binding.lifecycleOwner = this
         binding.viewModel = viewModel
@@ -71,9 +79,9 @@ class MainFragment : Fragment() {
         return binding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
+    override fun onStart() {
+        super.onStart()
+        binding.message.setOnClickListener { callbacks?.showDetail() }
     }
 
     private fun showToast(msg:String){
