@@ -54,29 +54,27 @@ class MainFragment : Fragment() {
             kpi?.let{
                 if(binding.viewModel is MainViewModel){
                     val parsedKPI = viewModel.convertKPI(it.kpi)
-
-                    var ss: SpannableString
-                    //var s = ""
-                    val rs = SpannableStringBuilder("")
-                    for( i in parsedKPI){
-                        ss = SpannableString("${i.value}      ${i.text}\n")
-                        var color = Color.GREEN
-                        when(i.color){
-                            "orange" -> color = Color.parseColor("#FFA500")
-                            "red" -> color = Color.RED
-                        }
-                        ss.setSpan(ForegroundColorSpan(color),0,i.value.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-                        rs.append(ss)
-                        //s += i.value + " " + i.text + "\n"
-                    }
-
-                    binding.message.text = rs.dropLast(1)
+                    binding.message.text = kpiToColoredText(parsedKPI)
                 }
-
             }
         })
 
         return binding.root
+    }
+
+    private fun kpiToColoredText(parsedKPI: List<MainViewModel.ParsedKPI>):CharSequence{
+        val rs = SpannableStringBuilder("")
+        for (i in parsedKPI) {
+            val ss = SpannableString("${i.value}      ${i.text}\n")
+            var color = Color.GREEN
+            when (i.color) {
+                "orange" -> color = Color.parseColor("#FFA500")
+                "red" -> color = Color.RED
+            }
+            ss.setSpan(ForegroundColorSpan(color), 0, i.value.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            rs.append(ss)
+        }
+        return rs.dropLast(1)
     }
 
     override fun onStart() {

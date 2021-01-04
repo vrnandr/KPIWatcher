@@ -4,7 +4,12 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.vrnandr.kpiwatcher.repository.Repository
+import com.example.vrnandr.kpiwatcher.worker.UpdateWorker
+import java.util.concurrent.TimeUnit
 
 const val NOTIFICATION_CHANNEL_ID = "kpi_change"
 
@@ -19,5 +24,8 @@ class KpiApplication : Application() {
             val notificationManager  = getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channel)
         }
+
+        val updateWorker = PeriodicWorkRequestBuilder<UpdateWorker>(15, TimeUnit.MINUTES).build()
+        WorkManager.getInstance(this).enqueue(updateWorker)
     }
 }
