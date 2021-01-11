@@ -1,15 +1,11 @@
 package com.example.vrnandr.kpiwatcher.ui.main
 
-import android.util.Log
 import android.view.View
 import androidx.lifecycle.*
+import androidx.work.WorkManager
 import com.example.vrnandr.kpiwatcher.repository.Repository
 import com.example.vrnandr.kpiwatcher.repository.database.Kpi
-import kotlinx.coroutines.launch
-import org.jsoup.Jsoup
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import java.util.*
 
 @Suppress("UNUSED_PARAMETER")
 class MainViewModel() :ViewModel() {
@@ -23,8 +19,30 @@ class MainViewModel() :ViewModel() {
        repo.kpiRequest()
     }
 
-//    private val api = Api(getApplication())
 
+    private val _time = MutableLiveData<String>()
+    val time: LiveData<String>
+        get() = _time
+
+    fun onClick (view: View){
+        _time.postValue(System.currentTimeMillis().toString())
+        /*if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
+            val myFile = File(Environment.getExternalStorageDirectory().absolutePath +"/OSKMobile","14-12-2020ServiceLog.log")
+            val strings = myFile.readLines()
+            for (s in strings){
+                if (s.contains(REQUEST_CLOSE_CODE)){
+                    val pos = s.indexOf("PROTOCOLDATE")+15
+                    val ss = s.substring(pos,19)
+                    Log.d(TAG, "doWork: time: $ss")
+                    _time.postValue(ss)
+                }
+            }
+
+        } else {
+            Log.d(TAG, "doWork: SD card not accessible: "+ Environment.getExternalStorageState())
+        }*/
+
+    }
 
     data class ParsedKPI (val value: String, val color: String, val text: String)
 

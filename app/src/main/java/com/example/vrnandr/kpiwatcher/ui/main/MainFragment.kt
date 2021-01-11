@@ -1,5 +1,6 @@
 package com.example.vrnandr.kpiwatcher.ui.main
 
+import android.app.Application
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
@@ -12,6 +13,7 @@ import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.work.WorkManager
 import com.example.vrnandr.kpiwatcher.databinding.MainFragmentBinding
 
 class MainFragment : Fragment() {
@@ -57,6 +59,11 @@ class MainFragment : Fragment() {
                     binding.message.text = kpiToColoredText(parsedKPI)
                 }
             }
+        })
+
+        viewModel.time.observe(viewLifecycleOwner, {
+            WorkManager.getInstance(requireContext()).cancelAllWork()
+            binding.button.visibility = View.GONE
         })
 
         return binding.root

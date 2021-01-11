@@ -2,23 +2,28 @@ package com.example.vrnandr.kpiwatcher.repository
 
 import android.app.Application
 import android.content.Context
+import android.graphics.Color
 import android.util.Log
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
+import com.example.vrnandr.kpiwatcher.NOTIFICATION_CHANNEL_KPI_CHANGE
+import com.example.vrnandr.kpiwatcher.R
 import com.example.vrnandr.kpiwatcher.repository.database.Kpi
 import com.example.vrnandr.kpiwatcher.repository.database.KpiDatabase
 import com.example.vrnandr.kpiwatcher.repository.network.Api
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import okhttp3.Dispatcher
 import org.jsoup.Jsoup
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class Repository private constructor(context: Context) {
+const val TAG = "my"
+
+class Repository private constructor(val context: Context) {
     companion object{
         private var INSTANCE: Repository? = null
 
@@ -36,10 +41,9 @@ class Repository private constructor(context: Context) {
     private val dao by lazy { KpiDatabase.getInstance(context.applicationContext).kpiDao  }
     private val networkApi by lazy { Api(context as Application) }
 
-
     val currentKPI = dao.getCurrentKPI()
     val allKpi = dao.getAllKPI()
-    suspend fun addKpi(kpi:Kpi) = dao.addKPI(kpi)
+    //suspend fun addKpi(kpi:Kpi) = dao.addKPI(kpi)
 
     private fun clearCookies() = networkApi.clearCookies()
 
@@ -112,53 +116,71 @@ class Repository private constructor(context: Context) {
     }
 
     fun kpiRequest(){
-        networkApi.retrofitService.dashboard().enqueue(object : Callback<String> {
-            override fun onResponse(call: Call<String>, response: Response<String>) {
-                if (response.isSuccessful) {
-                    val result: String? = response.body()
-                    result?.let {
-                        try {
-                            val doc = Jsoup.parse(it)
-                            val who = doc.select("h1.hyphens+p").first().text()
-                            val about = doc.select("h1.hyphens+p").next().text()
-                            val elements = doc.select("div.circle-chart")
-                            val data = elements.eachAttr("data-value")
-                            val color = elements.eachAttr("data-color")
-                            val names = elements.next().eachText()
-                            var kpiString = ""
-                            if (data.count() == names.count()) {
-                                for (i in 0 until data.count())
-                                    kpiString += "${data[i]} ${color[i]} ${names[i]}:"
-                                val kpi = Kpi(System.currentTimeMillis(), "0000001091", kpiString.dropLast(1))
-                                Log.d("my", "onResponse: $kpi")
-                                if (kpiString.isNotEmpty())
-                                    CoroutineScope(Dispatchers.IO).launch {
-                                        addKpi(kpi)
-                                    }
-                            }
-                            _responseKPE.value = "$who\n$about"
-                        } catch (i: IndexOutOfBoundsException) {
-                            _showErrorToast.value = "Error on parse HTML: " + i.message
-                        } catch (e: Exception) {
-                            _showErrorToast.value = "Error on parse HTML: " + e.message
-                            if (reopenLoginPage) {
-                                reopenLoginPage = false
-                                openLoginPage()
-                            }
+         networkApi.retrofitService.dashboard().enqueue(object : Callback<String> {
+             override fun onResponse(call: Call<String>, response: Response<String>) {
+                 if (response.isSuccessful) {
+                     val result: String? = response.body()
+                     result?.let {
+                         try {
+                             val doc = Jsoup.parse(it)
+                             val who = doc.select("h1.hyphens+p").first().text()
+                             val about = doc.select("h1.hyphens+p").next().text()
+                             val elements = doc.select("div.circle-chart")
+                             val data = elements.eachAttr("data-value")
+                             val color = elements.eachAttr("data-color")
+                             val names = elements.next().eachText()
+                             var kpiString = ""
+                             if (data.count() == names.count()) {
+                                 for (i in 0 until data.count())
+                                     kpiString += "${data[i]} ${color[i]} ${names[i]}:"
+                                 kpiString = kpiString.dropLast(1)
+                                 val kpi = Kpi(System.currentTimeMillis(), "0000001091", kpiString)
+                                 Log.d(TAG, "onResponse: $kpi")
+                                 if (currentKPI.value?.kpi != kpi.kpi && kpi.kpi.isNotEmpty()) {
+                                     Log.d(TAG, "onResponse: insert kpi and notify user")
+                                     CoroutineScope(Dispatchers.IO).launch { dao.addKPI(kpi) }
 
-                        }
-                    }
-                } else {
-                    _showErrorToast.value = "Response unsuccessful: " + response.message()
-                }
-            }
+                                     val colorString = kpiString.substringAfter(" ").substringBefore(" ")
+                                     var color = Color.GREEN
+                                     when (colorString) {
+                                         "orange" -> color = Color.parseColor("#FFA500")
+                                         "red" -> color = Color.RED
+                                     }
 
-            override fun onFailure(call: Call<String>, t: Throwable) {
-                _responseKPE.value = "Failure:" + t.message
-            }
+                                     val notifacation = NotificationCompat
+                                             .Builder(context, NOTIFICATION_CHANNEL_KPI_CHANGE)
+                                             .setSmallIcon(R.drawable.ic_circle)
+                                             .setContentTitle(context.resources.getString(R.string.kpi_changed))
+                                             .setContentText(kpiString)
+                                             .setColor(color)
+                                             .setContentIntent(null)
+                                             .build()
+                                     NotificationManagerCompat.from(context).notify(0, notifacation)
+                                 }
+                             }
+                             _responseKPE.value = "$who\n$about"
+                         } catch (i: IndexOutOfBoundsException) {
+                             _showErrorToast.value = "Error on parse HTML: " + i.message
+                         } catch (e: Exception) {
+                             _showErrorToast.value = "Error on parse HTML: " + e.message
+                             if (reopenLoginPage) {
+                                 reopenLoginPage = false
+                                 openLoginPage()
+                             }
+
+                         }
+                     }
+                 } else {
+                     _showErrorToast.value = "Response unsuccessful: " + response.message()
+                 }
+             }
+
+             override fun onFailure(call: Call<String>, t: Throwable) {
+                 _responseKPE.value = "Failure:" + t.message
+             }
 
 
-        })
+         })
     }
 
 

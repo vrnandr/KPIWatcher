@@ -10,8 +10,11 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.*
 import retrofit2.http.Headers
 
-//private const val BASE_URL = "http://oskinfotrans.ru/infoportal/"
-private const val BASE_URL = "http://192.168.0.14/"
+private const val BASE_URL = "http://oskinfotrans.ru/infoportal/"
+//private const val BASE_URL = "http://192.168.0.14/" //мебельная
+//private const val BASE_URL = "http://192.168.0.71/" //толстого
+//private const val BASE_URL = "http://10.184.199.164/" //работа
+
 private const val PREF = "cookiesName"
 private const val DOMAIN = "domain"
 private const val COOKIE = "cookie"
@@ -20,8 +23,8 @@ interface NetworkApi {
     @GET ("index.php?r=site%2Flogin")
     fun login():Call<String>
 
-    //@GET ("index.php?r=site%2Fdashboard")
-    @GET ("kpi100")
+    @GET ("index.php?r=site%2Fdashboard")
+    //@GET ("kpi100")
     fun dashboard():Call<String>
 
     @Headers("Content-Type: application/x-www-form-urlencoded")
@@ -39,7 +42,8 @@ class Api(val application: Application) {
 
         val interceptor = HttpLoggingInterceptor()
         interceptor.level = HttpLoggingInterceptor.Level.BODY
-        val okHttpClient = OkHttpClient.Builder().addInterceptor(interceptor).cookieJar(SessionCookieJar(application)).build()
+        //val okHttpClient = OkHttpClient.Builder().addInterceptor(interceptor).cookieJar(SessionCookieJar(application)).build()
+        val okHttpClient = OkHttpClient.Builder().cookieJar(SessionCookieJar(application)).build()
 
         val retrofit = Retrofit.Builder()
             .addConverterFactory(ScalarsConverterFactory.create())
