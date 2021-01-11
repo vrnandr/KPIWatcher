@@ -1,6 +1,5 @@
 package com.example.vrnandr.kpiwatcher.ui.main
 
-import android.app.Application
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
@@ -50,6 +49,8 @@ class MainFragment : Fragment() {
         viewModel.showErrorToast.observe(viewLifecycleOwner, {
             showToast(it)
         })
+
+        viewModel.messageToShow.observe(viewLifecycleOwner,{ showToast(it)})
 
         viewModel.currentKpi.observe(viewLifecycleOwner, { kpi ->
             Log.d("my", "KPI: $kpi")

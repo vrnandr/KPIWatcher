@@ -54,9 +54,20 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:text="стоп воркер"
-            android:onClick="@{viewModel::onClick}"
+            android:onClick="@{viewModel::onStopWorkerClick}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/imageButton"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/button2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Button"
+            android:onClick="@{viewModel::onClick}"
+            app:layout_constraintEnd_toStartOf="@+id/imageButton"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

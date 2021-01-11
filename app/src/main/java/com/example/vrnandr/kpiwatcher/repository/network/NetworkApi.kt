@@ -14,6 +14,7 @@ private const val BASE_URL = "http://oskinfotrans.ru/infoportal/"
 //private const val BASE_URL = "http://192.168.0.14/" //мебельная
 //private const val BASE_URL = "http://192.168.0.71/" //толстого
 //private const val BASE_URL = "http://10.184.199.164/" //работа
+//private const val BASE_URL = "http://192.168.0.47:8080/" //пк
 
 private const val PREF = "cookiesName"
 private const val DOMAIN = "domain"

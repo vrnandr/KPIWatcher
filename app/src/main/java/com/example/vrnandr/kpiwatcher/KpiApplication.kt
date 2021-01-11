@@ -30,7 +30,7 @@ class KpiApplication : Application() {
         val updateWorker = PeriodicWorkRequestBuilder<UpdateWorker>(15, TimeUnit.MINUTES).build()
         WorkManager.getInstance(this).apply {
             cancelAllWork()
-            enqueueUniquePeriodicWork(WORKER_TAG,ExistingPeriodicWorkPolicy.KEEP,updateWorker)
+            //enqueueUniquePeriodicWork(WORKER_TAG,ExistingPeriodicWorkPolicy.KEEP,updateWorker)
         }
     }
 }

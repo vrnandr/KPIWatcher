@@ -14,7 +14,7 @@ import com.example.vrnandr.kpiwatcher.repository.Repository
 import java.io.File
 import java.util.*
 
-const val REQUEST_CLOSE_CODE = "Статус изменен на \\\"Выполнен\\\""
+const val REQUEST_CLOSE_PHRASE = "Статус изменен на \\\"Выполнен\\\""
 const val TAG ="my"
 
 class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
@@ -22,17 +22,17 @@ class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worke
     override fun doWork(): Result {
         Log.d(TAG, "doWork: run work")
 
-        val notifacation = NotificationCompat
+        /*val notifacation = NotificationCompat
                 .Builder(context, NOTIFICATION_CHANNEL_WORKER)
                 .setSmallIcon(android.R.drawable.ic_menu_info_details)
                 .setContentTitle(context.resources.getString(R.string.worker))
                 .setContentText("")
                 .setContentIntent(null)
                 .build()
-        NotificationManagerCompat.from(context).notify(1, notifacation)
+        NotificationManagerCompat.from(context).notify(1, notifacation)*/
 
         val hour = (Calendar.getInstance()).get(Calendar.HOUR_OF_DAY)
-        if (hour in 8..17)
+        if (hour in 8..19)
             repo.kpiRequest()
         return Result.success()
     }
