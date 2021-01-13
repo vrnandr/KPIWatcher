@@ -32,8 +32,11 @@ class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worke
         NotificationManagerCompat.from(context).notify(1, notifacation)*/
 
         val hour = (Calendar.getInstance()).get(Calendar.HOUR_OF_DAY)
-        if (hour in 8..19)
+        Log.d(TAG, "doWork: час: $hour")
+        if (hour in 8..19){
+            Log.d(TAG, "doWork: run kpiRequest")
             repo.kpiRequest()
+        }
         return Result.success()
     }
 }

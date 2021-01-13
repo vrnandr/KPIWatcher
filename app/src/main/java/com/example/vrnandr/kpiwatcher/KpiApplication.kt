@@ -27,7 +27,7 @@ class KpiApplication : Application() {
             notificationManager.createNotificationChannel(channelWorker)
         }
 
-        val updateWorker = PeriodicWorkRequestBuilder<UpdateWorker>(15, TimeUnit.MINUTES).build()
+        val updateWorker = PeriodicWorkRequestBuilder<UpdateWorker>(30, TimeUnit.MINUTES).build()
         WorkManager.getInstance(this).apply {
             cancelAllWork()
             enqueueUniquePeriodicWork(WORKER_TAG,ExistingPeriodicWorkPolicy.KEEP,updateWorker)
