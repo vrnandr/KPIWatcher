@@ -36,21 +36,6 @@ class MainViewModel() :ViewModel() {
 
     fun onStopWorkerClick (view: View){
         _time.postValue(System.currentTimeMillis().toString())
-        /*if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
-            val myFile = File(Environment.getExternalStorageDirectory().absolutePath +"/OSKMobile","14-12-2020ServiceLog.log")
-            val strings = myFile.readLines()
-            for (s in strings){
-                if (s.contains(REQUEST_CLOSE_CODE)){
-                    val pos = s.indexOf("PROTOCOLDATE")+15
-                    val ss = s.substring(pos,19)
-                    Log.d(TAG, "doWork: time: $ss")
-                    _time.postValue(ss)
-                }
-            }
-
-        } else {
-            Log.d(TAG, "doWork: SD card not accessible: "+ Environment.getExternalStorageState())
-        }*/
     }
 
     fun onClick (view: View){

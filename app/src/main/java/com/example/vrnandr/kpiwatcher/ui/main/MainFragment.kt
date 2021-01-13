@@ -1,6 +1,7 @@
 package com.example.vrnandr.kpiwatcher.ui.main
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Spannable
@@ -10,10 +11,12 @@ import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.*
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.WorkManager
 import com.example.vrnandr.kpiwatcher.databinding.MainFragmentBinding
+import java.util.jar.Manifest
 
 class MainFragment : Fragment() {
 
@@ -64,7 +67,7 @@ class MainFragment : Fragment() {
 
         viewModel.time.observe(viewLifecycleOwner, {
             WorkManager.getInstance(requireContext()).cancelAllWork()
-            binding.button.visibility = View.GONE
+            binding.stopWorkerButton.visibility = View.GONE
         })
 
         return binding.root
@@ -88,6 +91,19 @@ class MainFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         binding.message.setOnClickListener { callbacks?.showDetail() }
+        binding.readLogsButton.setOnClickListener(View.OnClickListener {
+            if (ActivityCompat.checkSelfPermission(requireActivity(),android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+                requestPermissions(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),1)
+                //ActivityCompat.requestPermissions(requireActivity(), arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),1)
+            } else
+                viewModel.onClick(binding.readLogsButton)
+        })
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if (grantResults.isNotEmpty()&&grantResults[0]==PackageManager.PERMISSION_GRANTED)
+            viewModel.onClick(binding.readLogsButton)
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     private fun showToast(msg:String){

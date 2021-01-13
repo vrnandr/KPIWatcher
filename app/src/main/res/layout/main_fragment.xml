@@ -49,7 +49,7 @@
             app:layout_constraintTop_toBottomOf="@+id/imageButton" />
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/stopWorkerButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
@@ -60,12 +60,11 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:id="@+id/button2"
+            android:id="@+id/readLogsButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="Button"
-            android:onClick="@{viewModel::onClick}"
+            android:text="readLogs"
             app:layout_constraintEnd_toStartOf="@+id/imageButton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
