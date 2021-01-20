@@ -8,15 +8,15 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
-import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.WorkManager
+import com.example.vrnandr.kpiwatcher.R
 import com.example.vrnandr.kpiwatcher.databinding.MainFragmentBinding
-import java.util.jar.Manifest
+import timber.log.Timber
 
 class MainFragment : Fragment() {
 
@@ -34,6 +34,7 @@ class MainFragment : Fragment() {
     }
     interface Callbacks {
         fun showDetail()
+        fun logout()
     }
 
     override fun onDetach() {
@@ -43,6 +44,10 @@ class MainFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
+
+
+
+        setHasOptionsMenu(true)
 
         binding = MainFragmentBinding.inflate(inflater)
 
@@ -56,7 +61,7 @@ class MainFragment : Fragment() {
         viewModel.messageToShow.observe(viewLifecycleOwner,{ showToast(it)})
 
         viewModel.currentKpi.observe(viewLifecycleOwner, { kpi ->
-            Log.d("my", "KPI: $kpi")
+            Timber.d("KPI: $kpi")
             kpi?.let{
                 if(binding.viewModel is MainViewModel){
                     val parsedKPI = viewModel.convertKPI(it.kpi)
@@ -91,19 +96,33 @@ class MainFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         binding.message.setOnClickListener { callbacks?.showDetail() }
-        binding.readLogsButton.setOnClickListener(View.OnClickListener {
-            if (ActivityCompat.checkSelfPermission(requireActivity(),android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
-                requestPermissions(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),1)
-                //ActivityCompat.requestPermissions(requireActivity(), arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),1)
-            } else
+        binding.readLogsButton.setOnClickListener {
+            if (ActivityCompat.checkSelfPermission(requireActivity(), android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+                requestPermissions(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 1)
+            else
                 viewModel.onClick(binding.readLogsButton)
-        })
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if (grantResults.isNotEmpty()&&grantResults[0]==PackageManager.PERMISSION_GRANTED)
             viewModel.onClick(binding.readLogsButton)
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.main_fragment,menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId){
+            R.id.logout -> {
+                callbacks?.logout()
+                true
+            }
+            else -> return super.onOptionsItemSelected(item)
+        }
     }
 
     private fun showToast(msg:String){

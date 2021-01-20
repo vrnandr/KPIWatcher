@@ -9,12 +9,13 @@ import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.*
 import retrofit2.http.Headers
+import java.util.concurrent.TimeUnit
 
-private const val BASE_URL = "http://oskinfotrans.ru/infoportal/"
+//private const val BASE_URL = "http://oskinfotrans.ru/infoportal/"
 //private const val BASE_URL = "http://192.168.0.14/" //мебельная
 //private const val BASE_URL = "http://192.168.0.71/" //толстого
 //private const val BASE_URL = "http://10.184.199.164/" //работа
-//private const val BASE_URL = "http://192.168.0.47:8080/" //пк
+private const val BASE_URL = "http://192.168.0.47:8080/" //пк
 
 private const val PREF = "cookiesName"
 private const val DOMAIN = "domain"
@@ -24,8 +25,9 @@ interface NetworkApi {
     @GET ("index.php?r=site%2Flogin")
     fun login():Call<String>
 
-    @GET ("index.php?r=site%2Fdashboard")
+    //@GET ("index.php?r=site%2Fdashboard")
     //@GET ("kpi100")
+    @GET ("kpi")
     fun dashboard():Call<String>
 
     @Headers("Content-Type: application/x-www-form-urlencoded")
@@ -43,7 +45,11 @@ class Api(val application: Application) {
 
         val interceptor = HttpLoggingInterceptor()
         interceptor.level = HttpLoggingInterceptor.Level.BASIC
-        val okHttpClient = OkHttpClient.Builder().addInterceptor(interceptor).cookieJar(SessionCookieJar(application)).build()
+        val okHttpClient = OkHttpClient.Builder()
+                .addInterceptor(interceptor)
+                .cookieJar(SessionCookieJar(application))
+                .connectTimeout(20,TimeUnit.SECONDS)
+                .build()
         //val okHttpClient = OkHttpClient.Builder().cookieJar(SessionCookieJar(application)).build()
 
         val retrofit = Retrofit.Builder()
@@ -83,7 +89,7 @@ class SessionCookieJar (application: Application): CookieJar{
             for (cookieName in cookiesName){
                 val cookieValue = sp.getString(cookieName,"")
                 val expires = sp.getLong(cookieName+"_expires",0L)
-                //Log.d("my", "loadForRequest: current:"+System.currentTimeMillis()+", expires $expires")
+                //Timber.d("loadForRequest: current:"+System.currentTimeMillis()+", expires $expires")
                 if (System.currentTimeMillis()<expires)
                     cookies.add(Cookie.Builder().domain(domain).name(cookieName).value(cookieValue).build())
             }

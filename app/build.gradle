@@ -5,6 +5,8 @@ plugins {
     id 'kotlin-kapt'
 }
 
+apply plugin: 'com.google.firebase.crashlytics'
+
 android {
     compileSdkVersion 29
     buildFeatures {
@@ -58,4 +60,10 @@ dependencies {
 
     implementation "androidx.work:work-runtime-ktx:$work_version"
 
+    implementation platform('com.google.firebase:firebase-bom:26.3.0')
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+
+    implementation 'com.jakewharton.timber:timber:4.7.1'
+    implementation 'fr.bipi.treessence:treessence:0.3.0'
 }

@@ -4,11 +4,20 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import android.os.Environment
+import android.util.Log
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.example.vrnandr.kpiwatcher.logger.MyDebugTree
+import com.example.vrnandr.kpiwatcher.logger.MyFileLoggerTree
 import com.example.vrnandr.kpiwatcher.repository.Repository
 import com.example.vrnandr.kpiwatcher.worker.UpdateWorker
+import fr.bipi.tressence.file.FileLoggerTree
+import timber.log.Timber
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 const val NOTIFICATION_CHANNEL_KPI_CHANGE = "kpi_change"
@@ -30,7 +39,13 @@ class KpiApplication : Application() {
         val updateWorker = PeriodicWorkRequestBuilder<UpdateWorker>(30, TimeUnit.MINUTES).build()
         WorkManager.getInstance(this).apply {
             cancelAllWork()
-            enqueueUniquePeriodicWork(WORKER_TAG,ExistingPeriodicWorkPolicy.KEEP,updateWorker)
+            enqueueUniquePeriodicWork(WORKER_TAG, ExistingPeriodicWorkPolicy.KEEP,updateWorker)
         }
+
+        if(BuildConfig.DEBUG){
+            Timber.plant(MyDebugTree())
+        }
+
+        Timber.plant(MyFileLoggerTree().get())
     }
 }
