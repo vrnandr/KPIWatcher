@@ -11,11 +11,11 @@ import retrofit2.http.*
 import retrofit2.http.Headers
 import java.util.concurrent.TimeUnit
 
-//private const val BASE_URL = "http://oskinfotrans.ru/infoportal/"
+private const val BASE_URL = "http://oskinfotrans.ru/infoportal/"
 //private const val BASE_URL = "http://192.168.0.14/" //мебельная
 //private const val BASE_URL = "http://192.168.0.71/" //толстого
 //private const val BASE_URL = "http://10.184.199.164/" //работа
-private const val BASE_URL = "http://192.168.0.47:8080/" //пк
+//private const val BASE_URL = "http://192.168.0.47:8080/" //пк
 
 private const val PREF = "cookiesName"
 private const val DOMAIN = "domain"
@@ -25,9 +25,9 @@ interface NetworkApi {
     @GET ("index.php?r=site%2Flogin")
     fun login():Call<String>
 
-    //@GET ("index.php?r=site%2Fdashboard")
+    @GET ("index.php?r=site%2Fdashboard")
     //@GET ("kpi100")
-    @GET ("kpi")
+    //@GET ("kpi")
     fun dashboard():Call<String>
 
     @Headers("Content-Type: application/x-www-form-urlencoded")

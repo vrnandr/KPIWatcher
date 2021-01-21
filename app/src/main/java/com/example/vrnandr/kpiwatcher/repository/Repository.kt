@@ -31,6 +31,9 @@ private const val LOGIN_SUCCESSFUL = "Выйти"
 private const val LOGIN_FAILURE = "Incorrect username or password"
 
 private const val CREDENTIALS = "credentials"
+private const val SETTINGS = "settings"
+private const val USE_LOG_FILE = "use_log_file"
+private const val LAST_FIND_STRING = "last_find_string"
 
 class Repository private constructor(val context: Context) {
     companion object{
@@ -47,7 +50,8 @@ class Repository private constructor(val context: Context) {
         }
     }
 
-    private val sp = context.getSharedPreferences(CREDENTIALS, Context.MODE_PRIVATE)
+    private val spCredentials = context.getSharedPreferences(CREDENTIALS, Context.MODE_PRIVATE)
+    private val spSettings = context.getSharedPreferences(SETTINGS, Context.MODE_PRIVATE)
 
     private val dao by lazy { KpiDatabase.getInstance(context.applicationContext).kpiDao  }
     private val networkApi by lazy { Api(context as Application) }
@@ -61,16 +65,29 @@ class Repository private constructor(val context: Context) {
     }
 
     fun saveCredentials (login: String?, password: String?){
-        sp.edit().putString(LOGIN,login).putString(PASSWORD,password).apply()
+        spCredentials.edit().putString(LOGIN,login).putString(PASSWORD,password).apply()
     }
     fun getLogin():String?{
-        return sp.getString(LOGIN,null)
+        return spCredentials.getString(LOGIN,null)
     }
     private fun getPassword():String?{
-        return sp.getString(PASSWORD,null)
+        return spCredentials.getString(PASSWORD,null)
     }
     fun deleteCredentials(){
-        sp.edit().putString(LOGIN,null).putString(PASSWORD,null).apply()
+        spCredentials.edit().putString(LOGIN,null).putString(PASSWORD,null).apply()
+    }
+
+    fun setUseLogFile(use:Boolean){
+        spSettings.edit().putBoolean(USE_LOG_FILE,use).apply()
+    }
+    fun getUseLogFile():Boolean{
+        return spSettings.getBoolean(USE_LOG_FILE,false)
+    }
+    fun setLastString(s: String?){
+        spSettings.edit().putString(LAST_FIND_STRING,s).apply()
+    }
+    fun getLastString(): String? {
+        return spSettings.getString(LAST_FIND_STRING,null)
     }
 
     //<------
@@ -166,7 +183,7 @@ class Repository private constructor(val context: Context) {
                                         kpiNotificationString += "${data[i]} ${names[i]}:"
                                     }
                                     kpiString = kpiString.dropLast(1)
-                                    Timber.d("onResponse: $kpiString :::: ${currentKPI.value?.kpi}")
+                                    //Timber.d("onResponse: $kpiString :::: ${currentKPI.value?.kpi}")
                                     if (currentKPI.value?.kpi != kpiString && kpiString.isNotEmpty()) {
                                         kpiNotificationString = kpiNotificationString.dropLast(1)
                                         kpiNotificationString = kpiNotificationString.replace(":","\n")
@@ -197,10 +214,10 @@ class Repository private constructor(val context: Context) {
                                 }
                                 _responseKPE.value = "$who\n$about"
                             } catch (i: IndexOutOfBoundsException) {
-                                Timber.d("onResponse: Error on parse HTML: ${i.message}")
+                                Timber.e("onResponse: Error on parse HTML: ${i.message}")
                                 _showErrorToast.value = "Error on parse HTML: " + i.message
                             } catch (e: Exception) {
-                                Timber.d("onResponse: Error on parse HTML: ${e.message}")
+                                Timber.e("onResponse: Error on parse HTML: ${e.message}")
                                 _showErrorToast.value = "Error on parse HTML: " + e.message
                                 if (reopenLoginPage) {
                                     reopenLoginPage = false
@@ -209,12 +226,12 @@ class Repository private constructor(val context: Context) {
                             }
                         }
                     } else {
-                        Timber.d("onResponse: Response unsuccessful: ${response.message()}")
+                        Timber.e("onResponse: Response unsuccessful: ${response.message()}")
                         _showErrorToast.value = "Response unsuccessful: " + response.message()
                     }
                 }
                 override fun onFailure(call: Call<String>, t: Throwable) {
-                    Timber.d("onFailure: Failure: ${t.message}")
+                    Timber.e("onFailure: Failure: ${t.message}")
                     _responseKPE.value = "Failure:" + t.message
                 }
 

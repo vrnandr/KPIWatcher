@@ -44,15 +44,13 @@ class MainFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-
-
-
         setHasOptionsMenu(true)
 
         binding = MainFragmentBinding.inflate(inflater)
-
         binding.lifecycleOwner = this
         binding.viewModel = viewModel
+
+        binding.useLogFile.isChecked = viewModel.useLogFile
 
         viewModel.showErrorToast.observe(viewLifecycleOwner, {
             showToast(it)
@@ -95,19 +93,9 @@ class MainFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        binding.message.setOnClickListener { callbacks?.showDetail() }
-        binding.readLogsButton.setOnClickListener {
-            if (ActivityCompat.checkSelfPermission(requireActivity(), android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-                requestPermissions(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 1)
-            else
-                viewModel.onClick(binding.readLogsButton)
-        }
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if (grantResults.isNotEmpty()&&grantResults[0]==PackageManager.PERMISSION_GRANTED)
-            viewModel.onClick(binding.readLogsButton)
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        //TODO показ детализации пока не реализован
+        //binding.message.setOnClickListener { callbacks?.showDetail() }
+        binding.useLogFile.setOnClickListener { viewModel.onClick(binding.useLogFile) }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

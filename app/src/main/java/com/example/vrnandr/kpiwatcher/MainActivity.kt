@@ -1,11 +1,18 @@
 package com.example.vrnandr.kpiwatcher
 
+import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.work.WorkManager
 import com.example.vrnandr.kpiwatcher.repository.Repository
 import com.example.vrnandr.kpiwatcher.ui.main.DetailFragment
 import com.example.vrnandr.kpiwatcher.ui.main.LoginFragment
 import com.example.vrnandr.kpiwatcher.ui.main.MainFragment
+import timber.log.Timber
+import java.util.jar.Manifest
 
 class MainActivity : AppCompatActivity(), MainFragment.Callbacks, LoginFragment.Callbacks {
 
@@ -25,8 +32,26 @@ class MainActivity : AppCompatActivity(), MainFragment.Callbacks, LoginFragment.
                     .replace(R.id.container, LoginFragment.newInstance())
                     .commitNow()
             }
-
         }
+        checkPermission()
+    }
+
+    private fun checkPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+                requestPermissions(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE,android.Manifest.permission.WRITE_EXTERNAL_STORAGE),1)
+
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        //TODO разделить чтение/запись
+        if (!(grantResults.isNotEmpty()&&grantResults[0]==PackageManager.PERMISSION_GRANTED||grantResults[1]==PackageManager.PERMISSION_GRANTED)){
+            WorkManager.getInstance(this).cancelAllWork()
+            finish()
+        }
+
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun showDetail() {
@@ -37,7 +62,6 @@ class MainActivity : AppCompatActivity(), MainFragment.Callbacks, LoginFragment.
     }
 
     override fun logout() {
-        //repo.exitPressed()
         repo.deleteCredentials()
         supportFragmentManager.beginTransaction()
                 .replace(R.id.container, LoginFragment.newInstance())

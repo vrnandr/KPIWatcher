@@ -4,8 +4,6 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
-import android.os.Environment
-import android.util.Log
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
@@ -13,11 +11,7 @@ import com.example.vrnandr.kpiwatcher.logger.MyDebugTree
 import com.example.vrnandr.kpiwatcher.logger.MyFileLoggerTree
 import com.example.vrnandr.kpiwatcher.repository.Repository
 import com.example.vrnandr.kpiwatcher.worker.UpdateWorker
-import fr.bipi.tressence.file.FileLoggerTree
 import timber.log.Timber
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 const val NOTIFICATION_CHANNEL_KPI_CHANGE = "kpi_change"
@@ -45,7 +39,11 @@ class KpiApplication : Application() {
         if(BuildConfig.DEBUG){
             Timber.plant(MyDebugTree())
         }
-
-        Timber.plant(MyFileLoggerTree().get())
+        Timber.plant(MyFileLoggerTree())
     }
 }
+
+//TODO
+// - настройки
+// - детализация
+// - убрать запуск воркера при запуске приложения (перенести в запуск фрагмента?)

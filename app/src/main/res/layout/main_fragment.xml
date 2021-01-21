@@ -52,22 +52,20 @@
             android:id="@+id/stopWorkerButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="стоп воркер"
             android:onClick="@{viewModel::onStopWorkerClick}"
+            android:text="стоп воркер"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/imageButton"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@+id/imageButton" />
 
-        <Button
-            android:id="@+id/readLogsButton"
+        <CheckBox
+            android:id="@+id/useLogFile"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="readLogs"
+            android:text="по логу"
             app:layout_constraintEnd_toStartOf="@+id/imageButton"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@+id/imageButton" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
