@@ -10,8 +10,6 @@
             type="com.example.vrnandr.kpiwatcher.ui.main.LoginViewModel" />
     </data>
 
-
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"

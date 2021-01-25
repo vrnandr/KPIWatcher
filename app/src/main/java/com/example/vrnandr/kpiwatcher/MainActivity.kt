@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity(), MainFragment.Callbacks, LoginFragment.
         supportFragmentManager.beginTransaction()
                 .replace(R.id.container, DetailFragment.newInstance())
                 .addToBackStack(null)
-                .commitNow()
+                .commit()
     }
 
     override fun logout() {

@@ -18,19 +18,24 @@ private const val USE_LOG_TO_UPDATE = true
 class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
     private val repo = Repository.get()
     override fun doWork(): Result {
-        Timber.d("doWork: run work")
-        if (repo.getUseLogFile()){
-            if (readyToKPIUpdate()){
-                Timber.d("run kpiRequest on change log file")
-                repo.kpiRequest()
+        Timber.d("run worker")
+        val hour = (Calendar.getInstance()).get(Calendar.HOUR_OF_DAY)
+        val day = (Calendar.getInstance()).get(Calendar.DAY_OF_WEEK)
+        if (day in Calendar.MONDAY..Calendar.FRIDAY){
+            if (repo.getUseLogFile()){
+                if (readyToKPIUpdate()||hour==8){ // обновляем если есть запись в лог файле о закрытом запросе и утром с 8:00 до 9:00
+                    Timber.d("run kpiRequest on change log file")
+                    repo.kpiRequest()
+                }
+            } else {
+                if (hour in 8..19){ // обновляем с 8 утра до 8 вечера
+                    Timber.d("run schedule kpiRequest")
+                    repo.kpiRequest()
+                }
             }
-        } else {
-            val hour = (Calendar.getInstance()).get(Calendar.HOUR_OF_DAY)
-            if (hour in 8..19){
-                Timber.d("run schedule kpiRequest")
-                repo.kpiRequest()
-            }
-        }
+        } else
+            Timber.d("Weekend! Don't update KPI")
+
         return Result.success()
     }
 
@@ -55,13 +60,9 @@ class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worke
                     }
                 }
                 Timber.d("time: $hours:$minutes  find string: $lastString")
-
                 //если есть сохраненная строка и она отличается от последней найденной то
-                val saveLastString = repo.getLastString()
-                if (saveLastString==lastString)
+                if (lastString==repo.getLastString())
                     return false
-
-
                 if (hours != null && minutes != null) {
                     val currentHour = (Calendar.getInstance()).get(Calendar.HOUR_OF_DAY)
                     val currentMinute = (Calendar.getInstance()).get(Calendar.MINUTE)
@@ -83,5 +84,4 @@ class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worke
         }
         return false
     }
-
 }

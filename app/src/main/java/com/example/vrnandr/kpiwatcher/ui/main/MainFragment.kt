@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.work.WorkManager
 import com.example.vrnandr.kpiwatcher.R
 import com.example.vrnandr.kpiwatcher.databinding.MainFragmentBinding
+import com.example.vrnandr.kpiwatcher.utility.*
 import timber.log.Timber
 
 class MainFragment : Fragment() {
@@ -62,7 +63,7 @@ class MainFragment : Fragment() {
             Timber.d("KPI: $kpi")
             kpi?.let{
                 if(binding.viewModel is MainViewModel){
-                    val parsedKPI = viewModel.convertKPI(it.kpi)
+                    val parsedKPI = convertKPI(it.kpi)
                     binding.message.text = kpiToColoredText(parsedKPI)
                 }
             }
@@ -76,7 +77,7 @@ class MainFragment : Fragment() {
         return binding.root
     }
 
-    private fun kpiToColoredText(parsedKPI: List<MainViewModel.ParsedKPI>):CharSequence{
+    private fun kpiToColoredText(parsedKPI: List<ParsedKPI>):CharSequence{
         val rs = SpannableStringBuilder("")
         for (i in parsedKPI) {
             val ss = SpannableString("${i.value}      ${i.text}\n")
@@ -94,7 +95,7 @@ class MainFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         //TODO показ детализации пока не реализован
-        //binding.message.setOnClickListener { callbacks?.showDetail() }
+        binding.message.setOnClickListener { callbacks?.showDetail() }
         binding.useLogFile.setOnClickListener { viewModel.onClick(binding.useLogFile) }
     }
 

@@ -11,11 +11,14 @@ interface KpiDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addKPI(kpi: Kpi)
 
-    @Query ("select * from kpi_table order by timestamp asc")
-    fun getAllKPI(): LiveData<List<Kpi>>
+    @Query ("select * from kpi_table order by timestamp desc limit 1")
+    fun getLiveDataCurrentKPI(): LiveData<Kpi>
 
     @Query ("select * from kpi_table order by timestamp desc limit 1")
-    fun getCurrentKPI(): LiveData<Kpi>
+    suspend fun getCurrentKPI(): Kpi
+
+    @Query ("select * from kpi_table where personnel_number = :per_num order by timestamp asc")
+    suspend fun getKPI(per_num: String): List<Kpi>
 
     /*@Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addUser (user:User)*/

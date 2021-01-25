@@ -30,7 +30,8 @@ class KpiApplication : Application() {
             notificationManager.createNotificationChannel(channelWorker)
         }
 
-        val updateWorker = PeriodicWorkRequestBuilder<UpdateWorker>(30, TimeUnit.MINUTES).build()
+        val repo = Repository.get()
+        val updateWorker = PeriodicWorkRequestBuilder<UpdateWorker>(repo.getTimer(), TimeUnit.MINUTES).build()
         WorkManager.getInstance(this).apply {
             cancelAllWork()
             enqueueUniquePeriodicWork(WORKER_TAG, ExistingPeriodicWorkPolicy.KEEP,updateWorker)
@@ -47,3 +48,4 @@ class KpiApplication : Application() {
 // - настройки
 // - детализация
 // - убрать запуск воркера при запуске приложения (перенести в запуск фрагмента?)
+// - ротация логов

@@ -12,9 +12,7 @@ import com.example.vrnandr.kpiwatcher.R
 import com.example.vrnandr.kpiwatcher.repository.database.Kpi
 import com.example.vrnandr.kpiwatcher.repository.database.KpiDatabase
 import com.example.vrnandr.kpiwatcher.repository.network.Api
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.jsoup.Jsoup
 import retrofit2.Call
 import retrofit2.Callback
@@ -34,6 +32,10 @@ private const val CREDENTIALS = "credentials"
 private const val SETTINGS = "settings"
 private const val USE_LOG_FILE = "use_log_file"
 private const val LAST_FIND_STRING = "last_find_string"
+private const val TIMER = "timer"
+
+private const val TIMER_ON_LOG_FILE = 15L //минуты при обновлении по анализу лога МС
+private const val TIMER_ON_SCHEDULE = 60L //минуты при обновлении по расписанию
 
 class Repository private constructor(val context: Context) {
     companion object{
@@ -56,8 +58,9 @@ class Repository private constructor(val context: Context) {
     private val dao by lazy { KpiDatabase.getInstance(context.applicationContext).kpiDao  }
     private val networkApi by lazy { Api(context as Application) }
 
-    val currentKPI = dao.getCurrentKPI()
-    val allKpi = dao.getAllKPI()
+    val liveDataCurrentKPI = dao.getLiveDataCurrentKPI()
+    suspend fun currentKPI() = dao.getCurrentKPI()
+    suspend fun userKPI() = dao.getKPI(getLogin()?:"0000000000")
     suspend fun addKpi(kpi:Kpi) = dao.addKPI(kpi)
 
     private fun clearCookies() {
@@ -77,12 +80,20 @@ class Repository private constructor(val context: Context) {
         spCredentials.edit().putString(LOGIN,null).putString(PASSWORD,null).apply()
     }
 
-    fun setUseLogFile(use:Boolean){
-        spSettings.edit().putBoolean(USE_LOG_FILE,use).apply()
+    fun setUseLogFile(useLogFile:Boolean){
+        if (useLogFile)
+            spSettings.edit().putLong(TIMER, TIMER_ON_LOG_FILE).apply()
+        else
+            spSettings.edit().putLong(TIMER, TIMER_ON_SCHEDULE).apply()
+        spSettings.edit().putBoolean(USE_LOG_FILE,useLogFile).apply()
     }
     fun getUseLogFile():Boolean{
         return spSettings.getBoolean(USE_LOG_FILE,false)
     }
+    fun getTimer():Long{
+        return spSettings.getLong(TIMER, TIMER_ON_SCHEDULE)
+    }
+
     fun setLastString(s: String?){
         spSettings.edit().putString(LAST_FIND_STRING,s).apply()
     }
@@ -183,32 +194,38 @@ class Repository private constructor(val context: Context) {
                                         kpiNotificationString += "${data[i]} ${names[i]}:"
                                     }
                                     kpiString = kpiString.dropLast(1)
-                                    //Timber.d("onResponse: $kpiString :::: ${currentKPI.value?.kpi}")
-                                    if (currentKPI.value?.kpi != kpiString && kpiString.isNotEmpty()) {
-                                        kpiNotificationString = kpiNotificationString.dropLast(1)
-                                        kpiNotificationString = kpiNotificationString.replace(":","\n")
-                                        Timber.d("onResponse: insert kpi and notify user")
 
-                                        val kpi = Kpi(System.currentTimeMillis(), login, kpiString)
-                                        CoroutineScope(Dispatchers.IO).launch { addKpi(kpi) }
-                                        val colorString = kpiString.substringAfter(" ").substringBefore(" ")
-                                        var notificationIconColor = Color.GREEN
-                                        when (colorString) {
-                                            "orange" -> notificationIconColor = Color.parseColor("#FFA500")
-                                            "red" -> notificationIconColor = Color.RED
+                                    //var savedKPIString:String? = null
+                                    val job =  CoroutineScope(Dispatchers.IO).async { currentKPI().kpi }
+                                    runBlocking {
+                                        val savedKPIString = job.await()
+                                        Timber.d("onResponse: $kpiString :::: $savedKPIString")
+                                        if (savedKPIString != kpiString && kpiString.isNotEmpty()) {
+                                            kpiNotificationString = kpiNotificationString.dropLast(1)
+                                            kpiNotificationString = kpiNotificationString.replace(":","\n")
+                                            Timber.d("onResponse: insert kpi and notify user")
+
+                                            val kpi = Kpi(System.currentTimeMillis(), login, kpiString)
+                                            CoroutineScope(Dispatchers.IO).launch { addKpi(kpi) }
+                                            val colorString = kpiString.substringAfter(" ").substringBefore(" ")
+                                            var notificationIconColor = Color.GREEN
+                                            when (colorString) {
+                                                "orange" -> notificationIconColor = Color.parseColor("#FFA500")
+                                                "red" -> notificationIconColor = Color.RED
+                                            }
+                                            val notification = NotificationCompat
+                                                    .Builder(context, NOTIFICATION_CHANNEL_KPI_CHANGE)
+                                                    .setSmallIcon(R.drawable.ic_circle)
+                                                    .setContentTitle(context.resources.getString(R.string.kpi_changed))
+                                                    .setContentText(kpiNotificationString)
+                                                    .setColor(notificationIconColor)
+                                                    .setStyle(NotificationCompat.BigTextStyle()
+                                                            .bigText(kpiNotificationString))
+                                                    .build()
+                                            NotificationManagerCompat.from(context).notify(0, notification)
+                                        } else{
+                                            Timber.d("onResponse: kpi equals, not insert")
                                         }
-                                        val notification = NotificationCompat
-                                                .Builder(context, NOTIFICATION_CHANNEL_KPI_CHANGE)
-                                                .setSmallIcon(R.drawable.ic_circle)
-                                                .setContentTitle(context.resources.getString(R.string.kpi_changed))
-                                                .setContentText(kpiNotificationString)
-                                                .setColor(notificationIconColor)
-                                                .setStyle(NotificationCompat.BigTextStyle()
-                                                        .bigText(kpiNotificationString))
-                                                .build()
-                                        NotificationManagerCompat.from(context).notify(0, notification)
-                                    } else{
-                                        Timber.d("onResponse: kpi equals, not insert")
                                     }
 
                                 }
