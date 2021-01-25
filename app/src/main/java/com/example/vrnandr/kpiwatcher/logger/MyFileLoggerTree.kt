@@ -9,15 +9,17 @@ import java.util.*
 
 
 private const val LOG_DIR = "KPIWatcher"
-//const val LOG_DIR = "OSKMobile"
+private const val MAX_COUNT_LOG_FILES=5
+private const val LOG_SUFFIX = "KPIWatcher.log"
 
 class MyFileLoggerTree: Timber.DebugTree() {
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
         try {
             val logTimeStamp: String = SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
                     Locale.getDefault()).format(Date())
-            val logFileName = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date()) + "KPIWatcher.log"
+            val logFileName = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date()) + LOG_SUFFIX
             val file = generateFile(logFileName)
+            cleanupLogDir()
             if (file != null) {
                 val writer = FileWriter(file, true)
                 writer.append("$logTimeStamp - $tag: $message\r\n")
@@ -45,6 +47,32 @@ class MyFileLoggerTree: Timber.DebugTree() {
             }
         }
         return file
+    }
+
+    private fun cleanupLogDir(){
+        if (Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()) {
+            val sdcard = Environment.getExternalStorageDirectory().absolutePath
+            val dir = File("$sdcard/$LOG_DIR").listFiles()
+            dir?.let {
+                dir.sortBy { truncAndInvertDate(it.name) }
+                dir.reverse()
+                for (i in dir.indices){
+                    if (i >= MAX_COUNT_LOG_FILES){
+                        if (dir[i].delete())
+                            Timber.d("${dir[i].name} deleted")
+                    }
+
+                }
+            }
+        }
+    }
+
+    private fun truncAndInvertDate(name:String):String{
+        val date = name.substringBefore(LOG_SUFFIX)
+        val day = date.substringBefore('-')
+        val month =  date.substringAfter('-').substringBefore('-')
+        val year = date.substringAfterLast('-')
+        return "$year-$month-$day"
     }
 
     override fun createStackElementTag(element: StackTraceElement): String {

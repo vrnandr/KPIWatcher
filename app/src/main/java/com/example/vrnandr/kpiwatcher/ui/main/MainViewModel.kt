@@ -9,9 +9,6 @@ import com.example.vrnandr.kpiwatcher.R
 import com.example.vrnandr.kpiwatcher.repository.Repository
 import com.example.vrnandr.kpiwatcher.repository.database.Kpi
 
-private const val MINUTES_TO_UPDATE_KPI_ON_SITE = 16
-private const val OSK_DIRECTORY="OSKMobile"
-
 @Suppress("UNUSED_PARAMETER")
 class MainViewModel: ViewModel() {
     private val repo = Repository.get()
