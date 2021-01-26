@@ -14,8 +14,8 @@ import com.example.vrnandr.kpiwatcher.worker.UpdateWorker
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
-const val NOTIFICATION_CHANNEL_KPI_CHANGE = "kpi_change"
-const val NOTIFICATION_CHANNEL_WORKER = "kpi_change"
+const val NOTIFICATION_CHANNEL_KPI_CHANGE = "Изменение КПЭ"
+//const val NOTIFICATION_CHANNEL_WORKER = ""
 const val WORKER_TAG = "updateKPI"
 
 class KpiApplication : Application() {
@@ -24,10 +24,10 @@ class KpiApplication : Application() {
         Repository.initialize(this)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             val channelKPIChanged = NotificationChannel(NOTIFICATION_CHANNEL_KPI_CHANGE, getString(R.string.notification_channel_kpi_change), NotificationManager.IMPORTANCE_DEFAULT)
-            val channelWorker = NotificationChannel(NOTIFICATION_CHANNEL_WORKER, getString(R.string.notification_channel_worker), NotificationManager.IMPORTANCE_DEFAULT)
+            //val channelWorker = NotificationChannel(NOTIFICATION_CHANNEL_WORKER, getString(R.string.notification_channel_worker), NotificationManager.IMPORTANCE_DEFAULT)
             val notificationManager  = getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channelKPIChanged)
-            notificationManager.createNotificationChannel(channelWorker)
+            //notificationManager.createNotificationChannel(channelWorker)
         }
 
         val repo = Repository.get()
@@ -48,4 +48,4 @@ class KpiApplication : Application() {
 // - настройки
 // - детализация
 // - убрать запуск воркера при запуске приложения (перенести в запуск фрагмента?)
-// - ротация логов
+// - детализация с первого числа месяца

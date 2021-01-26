@@ -12,6 +12,7 @@ import com.example.vrnandr.kpiwatcher.R
 import com.example.vrnandr.kpiwatcher.repository.database.Kpi
 import com.example.vrnandr.kpiwatcher.repository.database.KpiDatabase
 import com.example.vrnandr.kpiwatcher.repository.network.Api
+import com.example.vrnandr.kpiwatcher.utility.convertKPI
 import kotlinx.coroutines.*
 import org.jsoup.Jsoup
 import retrofit2.Call
@@ -19,10 +20,6 @@ import retrofit2.Callback
 import retrofit2.Response
 import timber.log.Timber
 
-//const val USER_TAB_NUM = "0000000520"
-//const val USER_FIO = "СУШЕНЦОВАЛЕКСЕЙИВАНОВИЧ"
-//const val USER_TAB_NUM = "0000001091"
-//const val USER_FIO = "ВАРАНКИНАНДРЕЙАЛЕКСЕЕВИЧ"
 private const val LOGIN = "login"
 private const val PASSWORD = "password"
 private const val LOGIN_SUCCESSFUL = "Выйти"
@@ -188,26 +185,24 @@ class Repository private constructor(val context: Context) {
                                 val names = elements.next().eachText()
                                 if (data.count() == names.count() && names.count() == color.count()) {
                                     var kpiString = ""
-                                    var kpiNotificationString = ""
-                                    for (i in 0 until data.count()){
+                                    for (i in 0 until data.count())
                                         kpiString += "${data[i]} ${color[i]} ${names[i]}:"
-                                        kpiNotificationString += "${data[i]} ${names[i]}:"
-                                    }
                                     kpiString = kpiString.dropLast(1)
 
-                                    //var savedKPIString:String? = null
                                     val job =  CoroutineScope(Dispatchers.IO).async { currentKPI().kpi }
                                     runBlocking {
                                         val savedKPIString = job.await()
-                                        Timber.d("onResponse: $kpiString :::: $savedKPIString")
+                                        //Timber.d("onResponse: $kpiString :::: $savedKPIString")
                                         if (savedKPIString != kpiString && kpiString.isNotEmpty()) {
-                                            kpiNotificationString = kpiNotificationString.dropLast(1)
-                                            kpiNotificationString = kpiNotificationString.replace(":","\n")
+                                            val listKpi = convertKPI(kpiString)
+                                            var notificationText = ""
+                                            for (kpi in listKpi)
+                                                notificationText+="${kpi.value} ${kpi.text}\n"
+                                            notificationText.dropLast(2)
                                             Timber.d("onResponse: insert kpi and notify user")
-
                                             val kpi = Kpi(System.currentTimeMillis(), login, kpiString)
                                             CoroutineScope(Dispatchers.IO).launch { addKpi(kpi) }
-                                            val colorString = kpiString.substringAfter(" ").substringBefore(" ")
+                                            val colorString = listKpi.first().color
                                             var notificationIconColor = Color.GREEN
                                             when (colorString) {
                                                 "orange" -> notificationIconColor = Color.parseColor("#FFA500")
@@ -217,10 +212,10 @@ class Repository private constructor(val context: Context) {
                                                     .Builder(context, NOTIFICATION_CHANNEL_KPI_CHANGE)
                                                     .setSmallIcon(R.drawable.ic_circle)
                                                     .setContentTitle(context.resources.getString(R.string.kpi_changed))
-                                                    .setContentText(kpiNotificationString)
+                                                    .setContentText(notificationText)
                                                     .setColor(notificationIconColor)
                                                     .setStyle(NotificationCompat.BigTextStyle()
-                                                            .bigText(kpiNotificationString))
+                                                            .bigText(notificationText))
                                                     .build()
                                             NotificationManagerCompat.from(context).notify(0, notification)
                                         } else{
