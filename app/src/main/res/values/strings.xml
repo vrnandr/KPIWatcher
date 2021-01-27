@@ -7,7 +7,7 @@
     <string name="kpi_changed">КПЭ обновились</string>
     <string name="worker">Воркер запустился</string>
     <string name="login_prompt">Табельный номер</string>
-    <string name="password_prompt">ФИО польностью</string>
+    <string name="password_prompt">ФИО полностью</string>
     <string name="login_button">вход</string>
     <string name="logout">Выход</string>
 </resources>

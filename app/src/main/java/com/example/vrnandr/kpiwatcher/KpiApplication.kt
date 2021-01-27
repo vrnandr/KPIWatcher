@@ -30,12 +30,12 @@ class KpiApplication : Application() {
             //notificationManager.createNotificationChannel(channelWorker)
         }
 
-        val repo = Repository.get()
+        /*val repo = Repository.get()
         val updateWorker = PeriodicWorkRequestBuilder<UpdateWorker>(repo.getTimer(), TimeUnit.MINUTES).build()
         WorkManager.getInstance(this).apply {
             cancelAllWork()
             enqueueUniquePeriodicWork(WORKER_TAG, ExistingPeriodicWorkPolicy.KEEP,updateWorker)
-        }
+        }*/
 
         if(BuildConfig.DEBUG){
             Timber.plant(MyDebugTree())
@@ -47,5 +47,4 @@ class KpiApplication : Application() {
 //TODO
 // - настройки
 // - детализация
-// - убрать запуск воркера при запуске приложения (перенести в запуск фрагмента?)
 // - детализация с первого числа месяца

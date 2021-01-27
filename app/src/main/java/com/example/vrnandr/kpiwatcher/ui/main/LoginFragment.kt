@@ -61,7 +61,8 @@ class LoginFragment : Fragment() {
     override fun onStart() {
         binding.login.setOnClickListener {
             exit = true
-            val login = binding.loginEditText.text.toString().padStart(10,'0')
+            //val login = binding.loginEditText.text.toString().padStart(10,'0')
+            val login = binding.loginEditText.text.toString()
             val password = binding.passwordEditText.text.toString().toUpperCase(Locale.getDefault()).filter { !it.isWhitespace() }
             binding.loginEditText.setText(login)
             binding.passwordEditText.setText(password)

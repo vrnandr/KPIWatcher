@@ -6,12 +6,16 @@ import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.vrnandr.kpiwatcher.repository.Repository
 import com.example.vrnandr.kpiwatcher.ui.main.DetailFragment
 import com.example.vrnandr.kpiwatcher.ui.main.LoginFragment
 import com.example.vrnandr.kpiwatcher.ui.main.MainFragment
+import com.example.vrnandr.kpiwatcher.worker.UpdateWorker
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 import java.util.jar.Manifest
 
 class MainActivity : AppCompatActivity(), MainFragment.Callbacks, LoginFragment.Callbacks {
@@ -24,6 +28,13 @@ class MainActivity : AppCompatActivity(), MainFragment.Callbacks, LoginFragment.
         val login = repo.getLogin()
         if (savedInstanceState == null) {
             if (login!=null){
+
+                val updateWorker = PeriodicWorkRequestBuilder<UpdateWorker>(repo.getTimer(), TimeUnit.MINUTES).build()
+                WorkManager.getInstance(this).apply {
+                    cancelAllWork()
+                    enqueueUniquePeriodicWork(WORKER_TAG, ExistingPeriodicWorkPolicy.KEEP,updateWorker)
+                }
+
                 supportFragmentManager.beginTransaction()
                     .replace(R.id.container, MainFragment.newInstance())
                     .commitNow()

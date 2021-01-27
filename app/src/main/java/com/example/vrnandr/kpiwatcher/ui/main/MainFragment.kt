@@ -69,6 +69,7 @@ class MainFragment : Fragment() {
             }
         })
 
+
         viewModel.time.observe(viewLifecycleOwner, {
             WorkManager.getInstance(requireContext()).cancelAllWork()
             binding.stopWorkerButton.visibility = View.GONE

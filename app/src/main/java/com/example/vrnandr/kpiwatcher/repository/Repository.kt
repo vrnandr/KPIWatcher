@@ -116,6 +116,7 @@ class Repository private constructor(val context: Context) {
     private var _csrf:String =""
     fun openLoginPage(login: String, password: String) {
         clearCookies()
+        deleteCredentials()
         networkApi.retrofitService.login().enqueue(object : Callback<String> {
             override fun onFailure(call: Call<String>, t: Throwable) {
                 _showErrorToast.value = "Failure on open login page:"+t.message
@@ -189,10 +190,10 @@ class Repository private constructor(val context: Context) {
                                         kpiString += "${data[i]} ${color[i]} ${names[i]}:"
                                     kpiString = kpiString.dropLast(1)
 
-                                    val job =  CoroutineScope(Dispatchers.IO).async { currentKPI().kpi }
+                                    val job =  CoroutineScope(Dispatchers.IO).async { currentKPI()?.kpi }
                                     runBlocking {
                                         val savedKPIString = job.await()
-                                        //Timber.d("onResponse: $kpiString :::: $savedKPIString")
+                                        Timber.d("onResponse: $kpiString :::: $savedKPIString")
                                         if (savedKPIString != kpiString && kpiString.isNotEmpty()) {
                                             val listKpi = convertKPI(kpiString)
                                             var notificationText = ""

@@ -44,7 +44,8 @@ class Api(val application: Application) {
     val retrofitService :NetworkApi by lazy {
 
         val interceptor = HttpLoggingInterceptor()
-        interceptor.level = HttpLoggingInterceptor.Level.BASIC
+        //interceptor.level = HttpLoggingInterceptor.Level.BASIC
+        interceptor.level = HttpLoggingInterceptor.Level.BODY
         val okHttpClient = OkHttpClient.Builder()
                 .addInterceptor(interceptor)
                 .cookieJar(SessionCookieJar(application))
