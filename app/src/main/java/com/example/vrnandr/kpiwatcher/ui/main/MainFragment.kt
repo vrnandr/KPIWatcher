@@ -53,9 +53,9 @@ class MainFragment : Fragment() {
 
         binding.useLogFile.isChecked = viewModel.useLogFile
 
-        viewModel.showErrorToast.observe(viewLifecycleOwner, {
+        /*viewModel.showErrorToast.observe(viewLifecycleOwner, {
             showToast(it)
-        })
+        })*/
 
         viewModel.messageToShow.observe(viewLifecycleOwner,{ showToast(it)})
 
@@ -68,7 +68,6 @@ class MainFragment : Fragment() {
                 }
             }
         })
-
 
         viewModel.time.observe(viewLifecycleOwner, {
             WorkManager.getInstance(requireContext()).cancelAllWork()

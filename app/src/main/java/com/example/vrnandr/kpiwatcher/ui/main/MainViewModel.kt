@@ -13,7 +13,7 @@ import com.example.vrnandr.kpiwatcher.repository.database.Kpi
 class MainViewModel: ViewModel() {
     private val repo = Repository.get()
     val responseKPE = repo.responseKPE
-    val showErrorToast = repo.showErrorToast
+    //val showErrorToast = repo.showErrorToast
 
     val useLogFile = repo.getUseLogFile()
 

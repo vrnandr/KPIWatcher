@@ -155,21 +155,23 @@ class Repository private constructor(val context: Context) {
                         _successLogin.postValue(true)
                         saveCredentials(login,password)
                         kpiRequest()
-                    }
-                    else if (result.contains(LOGIN_FAILURE)){
-                        _successLogin.postValue(false)
-                        deleteCredentials()
-                        _showErrorToast.value = "Login error"
-                    }
+                    } else
+                        {
+                        //if (result.contains(LOGIN_FAILURE)){
+                            _successLogin.postValue(false)
+                            deleteCredentials()
+                            _showErrorToast.value = "Login error"
+                        }
 
                 }
             }
         })
     }
 
-    fun kpiRequest(){
+    fun kpiRequest():Boolean{
         val login = getLogin()
         val password = getPassword()
+        var success = false
         if (!login.isNullOrBlank()&&!password.isNullOrBlank()){
             networkApi.retrofitService.dashboard().enqueue(object : Callback<String> {
                 override fun onResponse(call: Call<String>, response: Response<String>) {
@@ -226,6 +228,7 @@ class Repository private constructor(val context: Context) {
 
                                 }
                                 _responseKPE.value = "$who\n$about"
+                                success = true
                             } catch (i: IndexOutOfBoundsException) {
                                 Timber.e("onResponse: Error on parse HTML: ${i.message}")
                                 _showErrorToast.value = "Error on parse HTML: " + i.message
@@ -253,7 +256,7 @@ class Repository private constructor(val context: Context) {
         } else {
             _showErrorToast.value = "Login or password is NULL or blank, kpi request not permitted \n Logout and login again"
         }
-
+        return success
     }
     //------->
 

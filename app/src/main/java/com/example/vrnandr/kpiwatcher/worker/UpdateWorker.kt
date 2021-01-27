@@ -17,6 +17,7 @@ private const val USE_LOG_TO_UPDATE = true
 
 class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
     private val repo = Repository.get()
+    private var _lastString = ""
     override fun doWork(): Result {
         Timber.d("run worker")
         val hour = (Calendar.getInstance()).get(Calendar.HOUR_OF_DAY)
@@ -25,7 +26,8 @@ class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worke
             if (repo.getUseLogFile()){
                 if (readyToKPIUpdate()||hour==8){ // обновляем если есть запись в лог файле о закрытом запросе и утром с 8:00 до 9:00
                     Timber.d("run kpiRequest on change log file")
-                    repo.kpiRequest()
+                    if(repo.kpiRequest())
+                        repo.setLastString(_lastString)
                 }
             } else {
                 if (hour in 8..19){ // обновляем с 8 утра до 8 вечера
@@ -44,7 +46,7 @@ class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worke
             try {
                 val sdcard = Environment.getExternalStorageDirectory().absolutePath
                 val date = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date())
-                Timber.d("current date is $date")
+                //Timber.d("current date is $date")
                 val myFile = File("$sdcard/$OSK_DIRECTORY","${date}ServiceLog.log")
                 //val myFile = File(Environment.getExternalStorageDirectory().absolutePath +"/OSKMobile","11-01-2021ServiceLog.log")
                 val strings = myFile.readLines()
@@ -59,7 +61,7 @@ class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worke
                         lastString = s
                     }
                 }
-                Timber.d("time: $hours:$minutes  find string: $lastString")
+                //Timber.d("time: $hours:$minutes  find string: $lastString")
                 //если есть сохраненная строка и она отличается от последней найденной то
                 if (lastString==repo.getLastString())
                     return false
@@ -69,13 +71,15 @@ class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worke
                     val timeZoneMinuteOffset = Calendar.getInstance().timeZone.rawOffset/(1000*60)
                     val currentTotalMinutes = currentHour * 60 + currentMinute
                     val totalMinutes = hours * 60 + minutes
-                    Timber.d("$currentTotalMinutes >? $totalMinutes + $timeZoneMinuteOffset + $MINUTES_TO_UPDATE_KPI_ON_SITE")
+                    //Timber.d("$currentTotalMinutes >? $totalMinutes + $timeZoneMinuteOffset + $MINUTES_TO_UPDATE_KPI_ON_SITE")
                     if (currentTotalMinutes > totalMinutes + timeZoneMinuteOffset + MINUTES_TO_UPDATE_KPI_ON_SITE) {
-                        Timber.d("Время обновлять!")
-                        repo.setLastString(lastString)
+                        Timber.d("Update time!")
+                        _lastString = lastString //вот это вот, чтобы сохранить последную найденную строку, только если запрос на обновление кпэ был успешен
+                        //repo.setLastString(lastString)
                         return true
                     }
-                }
+                } else
+                    Timber.e("Error on parsing time \"$hours:$minutes\"")
             } catch (e:Exception){
                 Timber.e("Error on: ${e.message}")
             }
