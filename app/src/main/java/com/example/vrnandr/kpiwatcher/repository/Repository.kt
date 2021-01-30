@@ -119,7 +119,8 @@ class Repository private constructor(val context: Context) {
         deleteCredentials()
         networkApi.retrofitService.login().enqueue(object : Callback<String> {
             override fun onFailure(call: Call<String>, t: Throwable) {
-                _showErrorToast.value = "Failure on open login page:"+t.message
+                _showErrorToast.value = "Failure on open login page: ${t.message}"
+                Timber.d("Failure on open login page: ${t.message}")
             }
 
             override fun onResponse(call: Call<String>, response: Response<String>) {
@@ -131,10 +132,12 @@ class Repository private constructor(val context: Context) {
                         for (element in elements)
                             if (element.attr("name")=="csrf-token") {
                                 _csrf=element.attr("content")
-                                 login(login,password)
+                                Timber.d("open login page success, do login")
+                                login(login,password)
                             }
                     } catch (e:Exception){
                         _showErrorToast.value = "Error on parse login page HTML: ${e.message}"
+                        Timber.d("Error on parse login page HTML: ${e.message}")
                     }
                 }
             }
@@ -145,23 +148,31 @@ class Repository private constructor(val context: Context) {
         networkApi.retrofitService.loginrequest(_csrf, login, password,"1").enqueue(object :
                 Callback<String> {
             override fun onFailure(call: Call<String>, t: Throwable) {
-                _showErrorToast.value = "Failure on login:"+t.message
+                _showErrorToast.value = "Failure on login: ${t.message}"
+                Timber.d("Failure on login: ${t.message}")
             }
 
             override fun onResponse(call: Call<String>, response: Response<String>) {
                 val result :String? = response.body()
                 result?.let {
                     if (result.contains(LOGIN_SUCCESSFUL)){
+                        Timber.d("login success, save credentials, do kpi request")
                         _successLogin.postValue(true)
                         saveCredentials(login,password)
                         kpiRequest()
-                    } else
-                        {
-                        //if (result.contains(LOGIN_FAILURE)){
+                    } else {
+                        if (result.contains(LOGIN_FAILURE)) {
                             _successLogin.postValue(false)
                             deleteCredentials()
                             _showErrorToast.value = "Login error"
+                            Timber.d("login unsuccessful")
+                            Timber.d(result)
+                        } else {
+                            Timber.d("WTF it can`t be")
+                            Timber.d(result)
                         }
+                    }
+
 
                 }
             }
@@ -199,8 +210,12 @@ class Repository private constructor(val context: Context) {
                                         if (savedKPIString != kpiString && kpiString.isNotEmpty()) {
                                             val listKpi = convertKPI(kpiString)
                                             var notificationText = ""
-                                            for (kpi in listKpi)
-                                                notificationText+="${kpi.value} ${kpi.text}\n"
+                                            for (kpi in listKpi){
+                                                val kpiFloat = kpi.value.toFloatOrNull()
+                                                // в нотификации первая запись и не равные 100
+                                                if ((kpiFloat!=null && kpiFloat!=100f) || kpi==listKpi.first())
+                                                    notificationText+="${kpi.value} ${kpi.text}\n"
+                                            }
                                             notificationText.dropLast(2)
                                             Timber.d("onResponse: insert kpi and notify user")
                                             val kpi = Kpi(System.currentTimeMillis(), login, kpiString)
@@ -211,9 +226,20 @@ class Repository private constructor(val context: Context) {
                                                 "orange" -> notificationIconColor = Color.parseColor("#FFA500")
                                                 "red" -> notificationIconColor = Color.RED
                                             }
+                                            var iconId =R.drawable.ic_circle
+                                            val forNotificationIcon = listKpi.first().value.toFloatOrNull()
+                                            if (forNotificationIcon!=null){
+                                                if (forNotificationIcon==100f)
+                                                    iconId = R.drawable.ic_100
+                                                else if (forNotificationIcon>=85f&&forNotificationIcon<100f)
+                                                    iconId = R.drawable.ic_85
+                                                else if (forNotificationIcon>=70f&&forNotificationIcon<85f)
+                                                    iconId = R.drawable.ic_70
+                                            }
+
                                             val notification = NotificationCompat
                                                     .Builder(context, NOTIFICATION_CHANNEL_KPI_CHANGE)
-                                                    .setSmallIcon(R.drawable.ic_circle)
+                                                    .setSmallIcon(iconId)
                                                     .setContentTitle(context.resources.getString(R.string.kpi_changed))
                                                     .setContentText(notificationText)
                                                     .setColor(notificationIconColor)
@@ -225,7 +251,6 @@ class Repository private constructor(val context: Context) {
                                             Timber.d("onResponse: kpi equals, not insert")
                                         }
                                     }
-
                                 }
                                 _responseKPE.value = "$who\n$about"
                                 success = true
@@ -237,7 +262,7 @@ class Repository private constructor(val context: Context) {
                                 _showErrorToast.value = "Error on parse HTML: " + e.message
                                 if (reopenLoginPage) {
                                     reopenLoginPage = false
-                                    openLoginPage(login,password)
+                                    //openLoginPage(login,password)
                                 }
                             }
                         }
@@ -250,11 +275,10 @@ class Repository private constructor(val context: Context) {
                     Timber.e("onFailure: Failure: ${t.message}")
                     _responseKPE.value = "Failure:" + t.message
                 }
-
-
             })
         } else {
             _showErrorToast.value = "Login or password is NULL or blank, kpi request not permitted \n Logout and login again"
+            Timber.d("Login or password is NULL or blank, kpi request not permitted \n Logout and login again")
         }
         return success
     }

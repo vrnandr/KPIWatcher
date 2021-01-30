@@ -94,7 +94,6 @@ class MainFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        //TODO показ детализации пока не реализован
         binding.message.setOnClickListener { callbacks?.showDetail() }
         binding.useLogFile.setOnClickListener { viewModel.onClick(binding.useLogFile) }
     }
