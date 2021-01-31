@@ -19,11 +19,13 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import timber.log.Timber
+import java.util.*
 
 private const val LOGIN = "login"
 private const val PASSWORD = "password"
 private const val LOGIN_SUCCESSFUL = "Выйти"
 private const val LOGIN_FAILURE = "Incorrect username or password"
+private const val KPI_NOT_FOUND ="КПЭ не найдены"
 
 private const val CREDENTIALS = "credentials"
 private const val SETTINGS = "settings"
@@ -57,8 +59,21 @@ class Repository private constructor(val context: Context) {
 
     val liveDataCurrentKPI = dao.getLiveDataCurrentKPI()
     suspend fun currentKPI() = dao.getCurrentKPI()
-    suspend fun userKPI() = dao.getKPI(getLogin()?:"0000000000")
     suspend fun addKpi(kpi:Kpi) = dao.addKPI(kpi)
+
+
+    suspend fun userKPI():List<Kpi> {
+        //timestamp начала месяца, чтобы запросить данные за текущий месяц
+        val cal = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            clear(Calendar.MINUTE)
+            clear(Calendar.SECOND)
+            clear(Calendar.MILLISECOND)
+            set(Calendar.DAY_OF_MONTH, 1)
+        }
+         return dao.getKPI(getLogin()?:"0000000000",cal.timeInMillis)
+    }
+
 
     private fun clearCookies() {
         networkApi.clearCookies()
@@ -193,66 +208,71 @@ class Repository private constructor(val context: Context) {
                                 val doc = Jsoup.parse(it)
                                 val who = doc.select("h1.hyphens+p").first().text()
                                 val about = doc.select("h1.hyphens+p").next().text()
-                                val elements = doc.select("div.circle-chart")
-                                val data = elements.eachAttr("data-value")
-                                val color = elements.eachAttr("data-color")
-                                val names = elements.next().eachText()
-                                if (data.count() == names.count() && names.count() == color.count()) {
-                                    var kpiString = ""
-                                    for (i in 0 until data.count())
-                                        kpiString += "${data[i]} ${color[i]} ${names[i]}:"
-                                    kpiString = kpiString.dropLast(1)
+                                if (!result.contains(KPI_NOT_FOUND)) {
+                                    val elements = doc.select("div.circle-chart")
+                                    val data = elements.eachAttr("data-value")
+                                    val color = elements.eachAttr("data-color")
+                                    val names = elements.next().eachText()
+                                    if (data.count() == names.count() && names.count() == color.count()) {
+                                        var kpiString = ""
+                                        for (i in 0 until data.count())
+                                            kpiString += "${data[i]} ${color[i]} ${names[i]}:"
+                                        kpiString = kpiString.dropLast(1)
 
-                                    val job =  CoroutineScope(Dispatchers.IO).async { currentKPI()?.kpi }
-                                    runBlocking {
-                                        val savedKPIString = job.await()
-                                        Timber.d("onResponse: $kpiString :::: $savedKPIString")
-                                        if (savedKPIString != kpiString && kpiString.isNotEmpty()) {
-                                            val listKpi = convertKPI(kpiString)
-                                            var notificationText = ""
-                                            for (kpi in listKpi){
-                                                val kpiFloat = kpi.value.toFloatOrNull()
-                                                // в нотификации первая запись и не равные 100
-                                                if ((kpiFloat!=null && kpiFloat!=100f) || kpi==listKpi.first())
-                                                    notificationText+="${kpi.value} ${kpi.text}\n"
-                                            }
-                                            notificationText.dropLast(2)
-                                            Timber.d("onResponse: insert kpi and notify user")
-                                            val kpi = Kpi(System.currentTimeMillis(), login, kpiString)
-                                            CoroutineScope(Dispatchers.IO).launch { addKpi(kpi) }
-                                            val colorString = listKpi.first().color
-                                            var notificationIconColor = Color.GREEN
-                                            when (colorString) {
-                                                "orange" -> notificationIconColor = Color.parseColor("#FFA500")
-                                                "red" -> notificationIconColor = Color.RED
-                                            }
-                                            var iconId =R.drawable.ic_circle
-                                            val forNotificationIcon = listKpi.first().value.toFloatOrNull()
-                                            if (forNotificationIcon!=null){
-                                                if (forNotificationIcon==100f)
-                                                    iconId = R.drawable.ic_100
-                                                else if (forNotificationIcon>=85f&&forNotificationIcon<100f)
-                                                    iconId = R.drawable.ic_85
-                                                else if (forNotificationIcon>=70f&&forNotificationIcon<85f)
-                                                    iconId = R.drawable.ic_70
-                                            }
+                                        val job =  CoroutineScope(Dispatchers.IO).async { currentKPI()?.kpi }
+                                        runBlocking {
+                                            val savedKPIString = job.await()
+                                            Timber.d("onResponse: $kpiString :::: $savedKPIString")
+                                            if (savedKPIString != kpiString && kpiString.isNotEmpty()) {
+                                                val listKpi = convertKPI(kpiString)
+                                                var notificationText = ""
+                                                for (kpi in listKpi){
+                                                    val kpiFloat = kpi.value.toFloatOrNull()
+                                                    // в нотификации первая запись и не равные 100
+                                                    if ((kpiFloat!=null && kpiFloat!=100f) || kpi==listKpi.first())
+                                                        notificationText+="${kpi.value} ${kpi.text}\n"
+                                                }
+                                                notificationText.dropLast(2)
+                                                Timber.d("onResponse: insert kpi and notify user")
+                                                val kpi = Kpi(System.currentTimeMillis(), login, kpiString)
+                                                CoroutineScope(Dispatchers.IO).launch { addKpi(kpi) }
+                                                val colorString = listKpi.first().color
+                                                var notificationIconColor = Color.GREEN
+                                                when (colorString) {
+                                                    "orange" -> notificationIconColor = Color.parseColor("#FFA500")
+                                                    "red" -> notificationIconColor = Color.RED
+                                                }
+                                                var iconId =R.drawable.ic_circle
+                                                val forNotificationIcon = listKpi.first().value.toFloatOrNull()
+                                                if (forNotificationIcon!=null){
+                                                    if (forNotificationIcon==100f)
+                                                        iconId = R.drawable.ic_100
+                                                    else if (forNotificationIcon>=85f&&forNotificationIcon<100f)
+                                                        iconId = R.drawable.ic_85
+                                                    else if (forNotificationIcon>=70f&&forNotificationIcon<85f)
+                                                        iconId = R.drawable.ic_70
+                                                }
 
-                                            val notification = NotificationCompat
-                                                    .Builder(context, NOTIFICATION_CHANNEL_KPI_CHANGE)
-                                                    .setSmallIcon(iconId)
-                                                    .setContentTitle(context.resources.getString(R.string.kpi_changed))
-                                                    .setContentText(notificationText)
-                                                    .setColor(notificationIconColor)
-                                                    .setStyle(NotificationCompat.BigTextStyle()
-                                                            .bigText(notificationText))
-                                                    .build()
-                                            NotificationManagerCompat.from(context).notify(0, notification)
-                                        } else{
-                                            Timber.d("onResponse: kpi equals, not insert")
+                                                val notification = NotificationCompat
+                                                        .Builder(context, NOTIFICATION_CHANNEL_KPI_CHANGE)
+                                                        .setSmallIcon(iconId)
+                                                        .setContentTitle(context.resources.getString(R.string.kpi_changed))
+                                                        .setContentText(notificationText)
+                                                        .setColor(notificationIconColor)
+                                                        .setStyle(NotificationCompat.BigTextStyle()
+                                                                .bigText(notificationText))
+                                                        .build()
+                                                NotificationManagerCompat.from(context).notify(0, notification)
+                                            } else{
+                                                Timber.d("onResponse: kpi equals, not insert")
+                                            }
                                         }
                                     }
+                                    _responseKPE.value = "$who\n$about"
+                                } else {
+                                    _responseKPE.value = "$who\n$about\n$KPI_NOT_FOUND"
                                 }
-                                _responseKPE.value = "$who\n$about"
+
                                 success = true
                             } catch (i: IndexOutOfBoundsException) {
                                 Timber.e("onResponse: Error on parse HTML: ${i.message}")

@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import com.example.vrnandr.kpiwatcher.databinding.DetailFragmentBinding
+import kotlinx.android.synthetic.main.detail_fragment.*
 
 class DetailFragment : Fragment() {
 
@@ -19,9 +20,13 @@ class DetailFragment : Fragment() {
         binding.lifecycleOwner = this
         viewModel = ViewModelProvider(this).get(DetailViewModel::class.java)
         binding.viewModel = viewModel
-        binding.chart.data = viewModel.getData()
-        binding.chart.invalidate()
-
+        binding.chart.apply {
+            data = viewModel.getData()
+            xAxis.valueFormatter = DetailViewModel.MyXAxisFormatter()
+            description.isEnabled = false
+            invalidate()
+        }
+        
         return binding.root
     }
 

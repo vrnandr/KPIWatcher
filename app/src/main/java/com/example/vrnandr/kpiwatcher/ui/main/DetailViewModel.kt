@@ -4,11 +4,15 @@ import android.graphics.Color
 import androidx.lifecycle.ViewModel
 import com.example.vrnandr.kpiwatcher.repository.Repository
 import com.example.vrnandr.kpiwatcher.utility.convertKPI
+import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import kotlinx.coroutines.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 class DetailViewModel :ViewModel() {
 
@@ -38,7 +42,11 @@ class DetailViewModel :ViewModel() {
             return@runBlocking LineData(dataSet)
         } else
             return@runBlocking LineData()
+    }
 
-
+    class MyXAxisFormatter: ValueFormatter(){
+        override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+            return SimpleDateFormat("dd-MM HH:mm", Locale.getDefault()).format(Date(value.toLong()))
+        }
     }
 }

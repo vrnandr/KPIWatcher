@@ -17,8 +17,8 @@ interface KpiDao {
     @Query ("select * from kpi_table order by timestamp desc limit 1")
     suspend fun getCurrentKPI(): Kpi?
 
-    @Query ("select * from kpi_table where personnel_number = :per_num order by timestamp asc")
-    suspend fun getKPI(per_num: String): List<Kpi>
+    @Query ("select * from kpi_table where personnel_number = :per_num and timestamp > :first_day order by timestamp asc")
+    suspend fun getKPI(per_num: String, first_day: Long): List<Kpi>
 
     /*@Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addUser (user:User)*/
