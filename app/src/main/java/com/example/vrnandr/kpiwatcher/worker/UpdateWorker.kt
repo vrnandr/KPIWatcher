@@ -26,8 +26,8 @@ class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worke
             if (repo.getUseLogFile()){
                 if (readyToKPIUpdate()||hour==8){ // обновляем если есть запись в лог файле о закрытом запросе и утром с 8:00 до 9:00
                     Timber.d("run kpiRequest on change log file")
-                    if(repo.kpiRequest())
-                        repo.setLastString(_lastString)
+                    repo.kpiRequest()
+                        //repo.setLastString(_lastString)
                 }
             } else {
                 if (hour in 8..19){ // обновляем с 8 утра до 8 вечера
@@ -48,6 +48,7 @@ class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worke
                 val date = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date())
                 //Timber.d("current date is $date")
                 val myFile = File("$sdcard/$OSK_DIRECTORY","${date}ServiceLog.log")
+                Timber.d(myFile.name)
                 //val myFile = File(Environment.getExternalStorageDirectory().absolutePath +"/OSKMobile","11-01-2021ServiceLog.log")
                 val strings = myFile.readLines()
                 var hours: Int? = null
@@ -74,7 +75,8 @@ class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worke
                     //Timber.d("$currentTotalMinutes >? $totalMinutes + $timeZoneMinuteOffset + $MINUTES_TO_UPDATE_KPI_ON_SITE")
                     if (currentTotalMinutes > totalMinutes + timeZoneMinuteOffset + MINUTES_TO_UPDATE_KPI_ON_SITE) {
                         Timber.d("Update time!")
-                        _lastString = lastString //вот это вот, чтобы сохранить последную найденную строку, только если запрос на обновление кпэ был успешен
+                        repo.setLastString(lastString)
+                        //_lastString = lastString //вот это вот, чтобы сохранить последную найденную строку, только если запрос на обновление кпэ был успешен
                         //repo.setLastString(lastString)
                         return true
                     }

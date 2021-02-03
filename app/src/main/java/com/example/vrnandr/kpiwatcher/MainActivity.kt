@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity(), MainFragment.Callbacks, LoginFragment.
             if (login!=null){
                 val updateWorker = PeriodicWorkRequestBuilder<UpdateWorker>(repo.getTimer(), TimeUnit.MINUTES).build()
                 WorkManager.getInstance(this).apply {
-                    //cancelAllWork()
+                    cancelAllWork()
                     enqueueUniquePeriodicWork(WORKER_TAG, ExistingPeriodicWorkPolicy.KEEP,updateWorker)
                 }
                 supportFragmentManager.beginTransaction()
