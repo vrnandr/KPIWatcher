@@ -17,17 +17,16 @@ private const val USE_LOG_TO_UPDATE = true
 
 class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
     private val repo = Repository.get()
-    private var _lastString = ""
     override fun doWork(): Result {
         Timber.d("run worker")
         val hour = (Calendar.getInstance()).get(Calendar.HOUR_OF_DAY)
         val day = (Calendar.getInstance()).get(Calendar.DAY_OF_WEEK)
         if (day in Calendar.MONDAY..Calendar.FRIDAY){
             if (repo.getUseLogFile()){
-                if (readyToKPIUpdate()||hour==8){ // обновляем если есть запись в лог файле о закрытом запросе и утром с 8:00 до 9:00
+                val lastString = lastDoneString()
+                if (lastString!=null || hour==8){ // обновляем если есть запись в лог файле о закрытом запросе и утром с 8:00 до 9:00
                     Timber.d("run kpiRequest on change log file")
                     repo.kpiRequest()
-                        //repo.setLastString(_lastString)
                 }
             } else {
                 if (hour in 8..19){ // обновляем с 8 утра до 8 вечера
@@ -41,15 +40,12 @@ class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worke
         return Result.success()
     }
 
-    private fun readyToKPIUpdate():Boolean{
+    private fun lastDoneString():String?{
         if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
             try {
                 val sdcard = Environment.getExternalStorageDirectory().absolutePath
                 val date = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date())
-                //Timber.d("current date is $date")
                 val myFile = File("$sdcard/$OSK_DIRECTORY","${date}ServiceLog.log")
-                Timber.d(myFile.name)
-                //val myFile = File(Environment.getExternalStorageDirectory().absolutePath +"/OSKMobile","11-01-2021ServiceLog.log")
                 val strings = myFile.readLines()
                 var hours: Int? = null
                 var minutes: Int? = null
@@ -65,7 +61,7 @@ class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worke
                 //Timber.d("time: $hours:$minutes  find string: $lastString")
                 //если есть сохраненная строка и она отличается от последней найденной то
                 if (lastString==repo.getLastString())
-                    return false
+                    return null
                 if (hours != null && minutes != null) {
                     val currentHour = (Calendar.getInstance()).get(Calendar.HOUR_OF_DAY)
                     val currentMinute = (Calendar.getInstance()).get(Calendar.MINUTE)
@@ -75,10 +71,7 @@ class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worke
                     //Timber.d("$currentTotalMinutes >? $totalMinutes + $timeZoneMinuteOffset + $MINUTES_TO_UPDATE_KPI_ON_SITE")
                     if (currentTotalMinutes > totalMinutes + timeZoneMinuteOffset + MINUTES_TO_UPDATE_KPI_ON_SITE) {
                         Timber.d("Update time!")
-                        repo.setLastString(lastString)
-                        //_lastString = lastString //вот это вот, чтобы сохранить последную найденную строку, только если запрос на обновление кпэ был успешен
-                        //repo.setLastString(lastString)
-                        return true
+                        return lastString
                     }
                 } else
                     Timber.e("Error on parsing time \"$hours:$minutes\"")
@@ -88,6 +81,6 @@ class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worke
         } else {
             Timber.e("SD card not accessible: ${Environment.getExternalStorageState()}")
         }
-        return false
+        return null
     }
 }

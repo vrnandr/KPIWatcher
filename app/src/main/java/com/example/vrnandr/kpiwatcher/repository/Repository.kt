@@ -12,7 +12,7 @@ import com.example.vrnandr.kpiwatcher.R
 import com.example.vrnandr.kpiwatcher.repository.database.Kpi
 import com.example.vrnandr.kpiwatcher.repository.database.KpiDatabase
 import com.example.vrnandr.kpiwatcher.repository.network.Api
-import com.example.vrnandr.kpiwatcher.utility.convertKPI
+import com.example.vrnandr.kpiwatcher.utility.*
 import kotlinx.coroutines.*
 import org.jsoup.Jsoup
 import retrofit2.Call
@@ -242,20 +242,11 @@ class Repository private constructor(val context: Context) {
                                                     "orange" -> notificationIconColor = Color.parseColor("#FFA500")
                                                     "red" -> notificationIconColor = Color.RED
                                                 }
-                                                var iconId =R.drawable.ic_circle
-                                                val forNotificationIcon = listKpi.first().value.toFloatOrNull()
-                                                if (forNotificationIcon!=null){
-                                                    if (forNotificationIcon==100f)
-                                                        iconId = R.drawable.ic_100
-                                                    else if (forNotificationIcon>=85f&&forNotificationIcon<100f)
-                                                        iconId = R.drawable.ic_85
-                                                    else if (forNotificationIcon>=70f&&forNotificationIcon<85f)
-                                                        iconId = R.drawable.ic_70
-                                                }
 
+                                                val idIcon = idIconForNotification(listKpi.first().value.toFloatOrNull()?:0f)
                                                 val notification = NotificationCompat
                                                         .Builder(context, NOTIFICATION_CHANNEL_KPI_CHANGE)
-                                                        .setSmallIcon(iconId)
+                                                        .setSmallIcon(idIcon)
                                                         .setContentTitle(context.resources.getString(R.string.kpi_changed))
                                                         .setContentText(notificationText)
                                                         .setColor(notificationIconColor)
@@ -303,6 +294,5 @@ class Repository private constructor(val context: Context) {
         return success
     }
     //------->
-
 
 }
