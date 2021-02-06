@@ -53,10 +53,6 @@ class MainFragment : Fragment() {
 
         binding.useLogFile.isChecked = viewModel.useLogFile
 
-        /*viewModel.showErrorToast.observe(viewLifecycleOwner, {
-            showToast(it)
-        })*/
-
         viewModel.messageToShow.observe(viewLifecycleOwner,{ showToast(it)})
 
         viewModel.currentKpi.observe(viewLifecycleOwner, { kpi ->

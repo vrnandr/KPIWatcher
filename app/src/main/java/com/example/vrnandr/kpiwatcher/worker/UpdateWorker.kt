@@ -26,7 +26,8 @@ class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worke
                 val lastString = lastDoneString()
                 if (lastString!=null || hour==8){ // обновляем если есть запись в лог файле о закрытом запросе и утром с 8:00 до 9:00
                     Timber.d("run kpiRequest on change log file")
-                    repo.kpiRequest()
+                    if (repo.kpiRequest())
+                        repo.setLastString(lastString)
                 }
             } else {
                 if (hour in 8..19){ // обновляем с 8 утра до 8 вечера

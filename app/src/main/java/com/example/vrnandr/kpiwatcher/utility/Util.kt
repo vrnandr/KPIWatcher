@@ -1,6 +1,41 @@
 package com.example.vrnandr.kpiwatcher.utility
 
+import android.content.Context
+import android.graphics.Color
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import com.example.vrnandr.kpiwatcher.NOTIFICATION_CHANNEL_KPI_CHANGE
 import com.example.vrnandr.kpiwatcher.R
+
+fun notify(context: Context, kpiString:String){
+    val listKpi = convertKPI(kpiString)
+    var notificationText = ""
+    for (kpi in listKpi){
+        val kpiFloat = kpi.value.toFloatOrNull()
+        // в нотификации первая запись и не равные 100
+        if ((kpiFloat!=null && kpiFloat!=100f) || kpi==listKpi.first())
+            notificationText+="${kpi.value} ${kpi.text}\n"
+    }
+    notificationText.dropLast(2)
+    val colorString = listKpi.first().color
+    var notificationIconColor = Color.GREEN
+    when (colorString) {
+        "orange" -> notificationIconColor = Color.parseColor("#FFA500")
+        "red" -> notificationIconColor = Color.RED
+    }
+    val idIcon = idIconForNotification(listKpi.first().value.toFloatOrNull()?:0f)
+    val notification = NotificationCompat
+            .Builder(context, NOTIFICATION_CHANNEL_KPI_CHANGE)
+            .setSmallIcon(idIcon)
+            .setContentTitle(context.resources.getString(R.string.kpi_changed))
+            .setContentText(notificationText)
+            .setColor(notificationIconColor)
+            .setStyle(NotificationCompat.BigTextStyle()
+                    .bigText(notificationText))
+            .build()
+    NotificationManagerCompat.from(context).notify(0, notification)
+}
+
     fun idIconForNotification(value:Float):Int{
         return when (value.toInt()){
             0 -> R.drawable.ic_circle

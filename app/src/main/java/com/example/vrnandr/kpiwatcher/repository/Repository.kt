@@ -32,6 +32,7 @@ private const val SETTINGS = "settings"
 private const val USE_LOG_FILE = "use_log_file"
 private const val LAST_FIND_STRING = "last_find_string"
 private const val TIMER = "timer"
+private const val ABOUT = "about"
 
 private const val TIMER_ON_LOG_FILE = 15L //минуты при обновлении по анализу лога МС
 private const val TIMER_ON_SCHEDULE = 60L //минуты при обновлении по расписанию
@@ -113,6 +114,13 @@ class Repository private constructor(val context: Context) {
         return spSettings.getString(LAST_FIND_STRING,null)
     }
 
+    fun setAbout(s: String?){
+        spSettings.edit().putString(ABOUT,s).apply()
+    }
+    fun getAbout(): String? {
+        return spSettings.getString(ABOUT,null)
+    }
+
     //<------
     private val _showErrorToast = MutableLiveData<String>()
     val showErrorToast: LiveData<String>
@@ -122,10 +130,14 @@ class Repository private constructor(val context: Context) {
     val responseKPE: LiveData<String>
         get() = _responseKPE
 
+    init {
+        _responseKPE.value = getAbout()
+    }
+
+
     private val _successLogin = MutableLiveData<Boolean>()
     val successLogin: LiveData<Boolean>
         get() = _successLogin
-
 
     private var reopenLoginPage = true
     private var _csrf:String =""
@@ -224,36 +236,11 @@ class Repository private constructor(val context: Context) {
                                             val savedKPIString = job.await()
                                             Timber.d("onResponse: $kpiString :::: $savedKPIString")
                                             if (savedKPIString != kpiString && kpiString.isNotEmpty()) {
-                                                val listKpi = convertKPI(kpiString)
-                                                var notificationText = ""
-                                                for (kpi in listKpi){
-                                                    val kpiFloat = kpi.value.toFloatOrNull()
-                                                    // в нотификации первая запись и не равные 100
-                                                    if ((kpiFloat!=null && kpiFloat!=100f) || kpi==listKpi.first())
-                                                        notificationText+="${kpi.value} ${kpi.text}\n"
-                                                }
-                                                notificationText.dropLast(2)
                                                 Timber.d("onResponse: insert kpi and notify user")
+                                                notify(context, kpiString)
                                                 val kpi = Kpi(System.currentTimeMillis(), login, kpiString)
                                                 CoroutineScope(Dispatchers.IO).launch { addKpi(kpi) }
-                                                val colorString = listKpi.first().color
-                                                var notificationIconColor = Color.GREEN
-                                                when (colorString) {
-                                                    "orange" -> notificationIconColor = Color.parseColor("#FFA500")
-                                                    "red" -> notificationIconColor = Color.RED
-                                                }
-
-                                                val idIcon = idIconForNotification(listKpi.first().value.toFloatOrNull()?:0f)
-                                                val notification = NotificationCompat
-                                                        .Builder(context, NOTIFICATION_CHANNEL_KPI_CHANGE)
-                                                        .setSmallIcon(idIcon)
-                                                        .setContentTitle(context.resources.getString(R.string.kpi_changed))
-                                                        .setContentText(notificationText)
-                                                        .setColor(notificationIconColor)
-                                                        .setStyle(NotificationCompat.BigTextStyle()
-                                                                .bigText(notificationText))
-                                                        .build()
-                                                NotificationManagerCompat.from(context).notify(0, notification)
+                                                setAbout("$who\n$about")
                                             } else{
                                                 Timber.d("onResponse: kpi equals, not insert")
                                             }
