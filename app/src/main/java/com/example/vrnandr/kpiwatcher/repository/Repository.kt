@@ -199,8 +199,6 @@ class Repository private constructor(val context: Context) {
                             Timber.d(result)
                         }
                     }
-
-
                 }
             }
         })
@@ -240,21 +238,19 @@ class Repository private constructor(val context: Context) {
                                                 notify(context, kpiString)
                                                 val kpi = Kpi(System.currentTimeMillis(), login, kpiString)
                                                 CoroutineScope(Dispatchers.IO).launch { addKpi(kpi) }
-                                                setAbout("$who\n$about")
                                             } else{
                                                 Timber.d("onResponse: kpi equals, not insert")
                                             }
                                         }
                                     }
                                     _responseKPE.value = "$who\n$about"
+                                    setAbout("$who\n$about")
                                 } else {
                                     _responseKPE.value = "$who\n$about\n$KPI_NOT_FOUND"
+                                    setAbout("$who\n$about\n$KPI_NOT_FOUND")
                                 }
 
                                 success = true
-                            } catch (i: IndexOutOfBoundsException) {
-                                Timber.e("onResponse: Error on parse HTML: ${i.message}")
-                                _showErrorToast.value = "Error on parse HTML: " + i.message
                             } catch (e: Exception) {
                                 Timber.e("onResponse: Error on parse HTML: ${e.message}")
                                 _showErrorToast.value = "Error on parse HTML: " + e.message
