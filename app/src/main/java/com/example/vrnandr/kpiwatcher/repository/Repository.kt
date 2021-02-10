@@ -24,6 +24,7 @@ import java.util.*
 private const val LOGIN = "login"
 private const val PASSWORD = "password"
 private const val LOGIN_SUCCESSFUL = "Выйти"
+private const val LOGIN_WORD = "Вход"
 private const val LOGIN_FAILURE = "Incorrect username or password"
 private const val KPI_NOT_FOUND ="КПЭ не найдены"
 
@@ -215,6 +216,9 @@ class Repository private constructor(val context: Context) {
                         val result: String? = response.body()
                         result?.let {
                             try {
+                                //если в теле ответа есть текст "Вход" значит что-то пошло не так и надо снова выполнить логин, если нет парсим страницу
+                                if (result.contains(LOGIN_WORD))
+                                    openLoginPage(login,password)
                                 val doc = Jsoup.parse(it)
                                 val who = doc.select("h1.hyphens+p").first().text()
                                 val about = doc.select("h1.hyphens+p").next().text()
@@ -232,7 +236,7 @@ class Repository private constructor(val context: Context) {
                                         val job =  CoroutineScope(Dispatchers.IO).async { currentKPI()?.kpi }
                                         runBlocking {
                                             val savedKPIString = job.await()
-                                            Timber.d("onResponse: $kpiString :::: $savedKPIString")
+                                            //Timber.d("onResponse: $kpiString :::: $savedKPIString")
                                             if (savedKPIString != kpiString && kpiString.isNotEmpty()) {
                                                 Timber.d("onResponse: insert kpi and notify user")
                                                 notify(context, kpiString)
@@ -254,10 +258,10 @@ class Repository private constructor(val context: Context) {
                             } catch (e: Exception) {
                                 Timber.e("onResponse: Error on parse HTML: ${e.message}")
                                 _showErrorToast.value = "Error on parse HTML: " + e.message
-                                if (reopenLoginPage) {
+                                /*if (reopenLoginPage) {
                                     reopenLoginPage = false
-                                    //openLoginPage(login,password)
-                                }
+                                    openLoginPage(login,password)
+                                }*/
                             }
                         }
                     } else {
