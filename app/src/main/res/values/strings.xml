@@ -10,4 +10,8 @@
     <string name="password_prompt">ФИО полностью</string>
     <string name="login_button">вход</string>
     <string name="logout">Выход</string>
+    <string name="chart_bottom_page">График</string>
+    <string name="main_bottom_page">КПЭ</string>
+    <string name="settings_bottom_page">Настройки</string>
+
 </resources>
