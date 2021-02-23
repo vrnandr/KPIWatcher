@@ -1,9 +1,7 @@
 package com.example.vrnandr.kpiwatcher.ui.main
 
-import android.content.Context
 import android.os.Bundle
 import android.text.InputType
-import android.widget.Toast
 import androidx.preference.*
 import com.example.vrnandr.kpiwatcher.R
 
@@ -13,40 +11,50 @@ class SettingsFragment : PreferenceFragmentCompat() {
         //preferenceManager.sharedPreferencesName = "settings11"
        // preferenceManager.sharedPreferencesMode = Context.MODE_PRIVATE
         setPreferencesFromResource(R.xml.root_preferences, rootKey)
+
         val timer = findPreference<EditTextPreference>("timer")
-        timer?.setOnPreferenceChangeListener { preference, newValue ->
-            val intTimer = newValue.toString().toIntOrNull()
-            if (intTimer!=null && intTimer < 15){
-                (preference as EditTextPreference).text = getString(R.string.min_timer)
+        timer?.apply {
+            setOnBindEditTextListener { editText ->
+                editText.inputType = InputType.TYPE_CLASS_NUMBER
             }
+            setOnPreferenceChangeListener { _, newValue ->
+                val intValue = newValue.toString().toIntOrNull()
+                if (intValue!=null && intValue<15)
+                    timer.text = getString(R.string.min_timer)
+                true
+            }
+        }
+
+        val refreshMethod = findPreference<ListPreference>("refresh_method")
+        refreshMethod?.setOnPreferenceChangeListener { _, newValue ->
+            when (newValue){
+                "off" -> {
+                    timer?.isEnabled = false
+                }
+                "log_file" -> {
+                    timer?.isEnabled = true
+                    timer?.text = getString(R.string.min_timer)
+                }
+                "periodic" -> {
+                    timer?.isEnabled = true
+                    timer?.text = getString(R.string.periodic_timer)
+                }
+            }
+            //timer?.isEnabled = newValue != "off"
             true
         }
-        timer?.setOnBindEditTextListener { editText ->
-            editText.inputType = InputType.TYPE_CLASS_NUMBER
-            /*val intTimer = editText.text.toString().toIntOrNull()
-            if (intTimer!=null&&intTimer<15){
-                editText.setText(R.string.min_timer)
-            }*/
-        }
-
-        timer?.callChangeListener("15")
-
+        /*if (refreshMethod?.callChangeListener("log_file") == true)
+            Toast.makeText(activity,list.value,Toast.LENGTH_SHORT).show()*/
 
     }
 
     override fun onPreferenceTreeClick(preference: Preference?): Boolean {
-        val key = preference?.key
-        Toast.makeText(activity,key,Toast.LENGTH_SHORT).show()
+        /*val key = preference?.key
+        if (key == "refresh_method"){
+            val value = (preference as ListPreference).value
+            findPreference<EditTextPreference>("timer")?.isEnabled = value != "off"
+        }*/
         return super.onPreferenceTreeClick(preference)
     }
 
-    override fun onResume() {
-        super.onResume()
-        //PreferenceManager.setDefaultValues(activity,R.xml.root_preferences,false)
-        /*val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity)
-        val useLog = sharedPreferences.getBoolean("enable_logging", false)
-        val enableLogging = findPreference<SwitchPreferenceCompat>("enable_logging")
-        enableLogging?.isChecked = useLog*/
-
-    }
 }
