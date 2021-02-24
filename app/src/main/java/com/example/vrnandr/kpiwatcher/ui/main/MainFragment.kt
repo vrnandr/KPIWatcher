@@ -91,7 +91,8 @@ class MainFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         binding.message.setOnClickListener { callbacks?.showDetail() }
-        binding.useLogFile.setOnClickListener { viewModel.onClick(binding.useLogFile) }
+        //TODO remove
+        //binding.useLogFile.setOnClickListener { viewModel.onClick(binding.useLogFile) }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

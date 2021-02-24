@@ -2,13 +2,9 @@ package com.example.vrnandr.kpiwatcher.repository
 
 import android.app.Application
 import android.content.Context
-import android.graphics.Color
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.vrnandr.kpiwatcher.NOTIFICATION_CHANNEL_KPI_CHANGE
-import com.example.vrnandr.kpiwatcher.R
+import androidx.preference.PreferenceManager
 import com.example.vrnandr.kpiwatcher.repository.database.Kpi
 import com.example.vrnandr.kpiwatcher.repository.database.KpiDatabase
 import com.example.vrnandr.kpiwatcher.repository.network.Api
@@ -31,12 +27,15 @@ private const val KPI_NOT_FOUND ="КПЭ не найдены"
 private const val CREDENTIALS = "credentials"
 private const val SETTINGS = "settings"
 private const val USE_LOG_FILE = "use_log_file"
+private const val ENABLE_LOGGING = "enable_logging"
+
 private const val LAST_FIND_STRING = "last_find_string"
 private const val TIMER = "timer"
 private const val ABOUT = "about"
 
 private const val TIMER_ON_LOG_FILE = 15L //минуты при обновлении по анализу лога МС
-private const val TIMER_ON_SCHEDULE = 60L //минуты при обновлении по расписанию
+private const val DEFAULT_TIMER_LONG = 60L //минуты при обновлении по расписанию
+private const val DEFAULT_TIMER_STRING = "60"
 
 class Repository private constructor(val context: Context) {
     companion object{
@@ -54,7 +53,8 @@ class Repository private constructor(val context: Context) {
     }
 
     private val spCredentials = context.getSharedPreferences(CREDENTIALS, Context.MODE_PRIVATE)
-    private val spSettings = context.getSharedPreferences(SETTINGS, Context.MODE_PRIVATE)
+    //private val spSettings = context.getSharedPreferences(SETTINGS, Context.MODE_PRIVATE)
+    private val spSettings = PreferenceManager.getDefaultSharedPreferences(context)
 
     private val dao by lazy { KpiDatabase.getInstance(context.applicationContext).kpiDao  }
     private val networkApi by lazy { Api(context as Application) }
@@ -94,18 +94,22 @@ class Repository private constructor(val context: Context) {
         spCredentials.edit().putString(LOGIN,null).putString(PASSWORD,null).apply()
     }
 
-    fun setUseLogFile(useLogFile:Boolean){
+    //TODO remove on settings
+    /*fun setUseLogFile(useLogFile:Boolean){
         if (useLogFile)
             spSettings.edit().putLong(TIMER, TIMER_ON_LOG_FILE).apply()
         else
-            spSettings.edit().putLong(TIMER, TIMER_ON_SCHEDULE).apply()
+            spSettings.edit().putLong(TIMER, DEFAULT_TIMER_LONG).apply()
         spSettings.edit().putBoolean(USE_LOG_FILE,useLogFile).apply()
-    }
+    }*/
+
     fun getUseLogFile():Boolean{
-        return spSettings.getBoolean(USE_LOG_FILE,false)
+        return spSettings.getBoolean(ENABLE_LOGGING,false)
+        //return spSettings.getBoolean(USE_LOG_FILE,false)
     }
     fun getTimer():Long{
-        return spSettings.getLong(TIMER, TIMER_ON_SCHEDULE)
+        val strTimer = spSettings.getString(TIMER, DEFAULT_TIMER_STRING)
+        return strTimer?.toLongOrNull()?: DEFAULT_TIMER_LONG
     }
 
     fun setLastString(s: String?){

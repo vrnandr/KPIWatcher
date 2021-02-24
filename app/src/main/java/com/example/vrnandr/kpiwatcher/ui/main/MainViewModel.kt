@@ -41,11 +41,13 @@ class MainViewModel: ViewModel() {
         _time.postValue(System.currentTimeMillis().toString())
     }
 
-    fun onClick (view: View){
+
+    //TODO убрать после перехода на настройки, также в xml убрать
+    /*fun onClick (view: View){
         when(view.id){
             R.id.useLogFile -> {
                 repo.setUseLogFile((view as CheckBox).isChecked)
             }
         }
-    }
+    }*/
 }
