@@ -3,7 +3,15 @@ package com.example.vrnandr.kpiwatcher.ui.main
 import android.os.Bundle
 import android.text.InputType
 import androidx.preference.*
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.vrnandr.kpiwatcher.R
+import com.example.vrnandr.kpiwatcher.WORKER_TAG
+import com.example.vrnandr.kpiwatcher.repository.DEFAULT_TIMER_LONG
+import com.example.vrnandr.kpiwatcher.worker.UpdateWorker
+import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
@@ -46,6 +54,31 @@ class SettingsFragment : PreferenceFragmentCompat() {
         /*if (refreshMethod?.callChangeListener("log_file") == true)
             Toast.makeText(activity,list.value,Toast.LENGTH_SHORT).show()*/
 
+    }
+
+
+    // FIXME: 24.02.2021 воркеры перезапускаются при каждом закрытии окна настроек
+    override fun onStop() {
+        super.onStop()
+        val timer = findPreference<EditTextPreference>("timer")?.text?.toLongOrNull()?: DEFAULT_TIMER_LONG
+        val refreshMethod = findPreference<ListPreference>("refresh_method")
+        //Timber.d("timer is $timer, refresh method is ${refreshMethod?.value}")
+        when (refreshMethod?.value){
+            "off" -> {
+                activity?.let {
+                    WorkManager.getInstance(it).cancelAllWork()
+                }
+                Timber.d("worker off")
+            }
+            "log_file", "periodic" -> {
+                activity?.let {
+                    val updateWorker = PeriodicWorkRequestBuilder<UpdateWorker>(timer, TimeUnit.MINUTES).build()
+                    WorkManager.getInstance(it)
+                            .enqueueUniquePeriodicWork(WORKER_TAG, ExistingPeriodicWorkPolicy.REPLACE, updateWorker)
+                }
+                Timber.d("worker on $timer minutes")
+            }
+        }
     }
 
     override fun onPreferenceTreeClick(preference: Preference?): Boolean {

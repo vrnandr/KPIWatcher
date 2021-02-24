@@ -37,7 +37,6 @@ class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worke
             }
         } else
             Timber.d("Weekend! Don't update KPI")
-
         return Result.success()
     }
 

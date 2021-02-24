@@ -28,13 +28,14 @@ private const val CREDENTIALS = "credentials"
 private const val SETTINGS = "settings"
 private const val USE_LOG_FILE = "use_log_file"
 private const val ENABLE_LOGGING = "enable_logging"
+private const val REFRESH_METHOD = "refresh_method"
 
 private const val LAST_FIND_STRING = "last_find_string"
 private const val TIMER = "timer"
 private const val ABOUT = "about"
 
 private const val TIMER_ON_LOG_FILE = 15L //минуты при обновлении по анализу лога МС
-private const val DEFAULT_TIMER_LONG = 60L //минуты при обновлении по расписанию
+const val DEFAULT_TIMER_LONG = 60L //минуты при обновлении по расписанию
 private const val DEFAULT_TIMER_STRING = "60"
 
 class Repository private constructor(val context: Context) {
@@ -104,12 +105,18 @@ class Repository private constructor(val context: Context) {
     }*/
 
     fun getUseLogFile():Boolean{
-        return spSettings.getBoolean(ENABLE_LOGGING,false)
-        //return spSettings.getBoolean(USE_LOG_FILE,false)
+        val refreshMethod = spSettings.getString(REFRESH_METHOD,null)
+        return refreshMethod == "log_file"
+        //return spSettings.getBoolean(ENABLE_LOGGING,false)
     }
     fun getTimer():Long{
         val strTimer = spSettings.getString(TIMER, DEFAULT_TIMER_STRING)
         return strTimer?.toLongOrNull()?: DEFAULT_TIMER_LONG
+    }
+
+    fun useWorker():Boolean{
+        val refreshMethod = spSettings.getString(REFRESH_METHOD,null)
+        return refreshMethod == "log_file" || refreshMethod == "periodic"
     }
 
     fun setLastString(s: String?){
@@ -122,7 +129,7 @@ class Repository private constructor(val context: Context) {
     fun setAbout(s: String?){
         spSettings.edit().putString(ABOUT,s).apply()
     }
-    fun getAbout(): String? {
+    private fun getAbout(): String? {
         return spSettings.getString(ABOUT,null)
     }
 

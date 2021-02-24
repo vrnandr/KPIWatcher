@@ -37,10 +37,10 @@ class MainActivity : AppCompatActivity(), MainFragment.Callbacks, LoginFragment.
 
         val login = repo.getLogin()
         if (savedInstanceState == null) {
-            if (login!=null) {
+            if (login!=null && repo.useWorker()) {
                 val updateWorker = PeriodicWorkRequestBuilder<UpdateWorker>(repo.getTimer(), TimeUnit.MINUTES).build()
                 WorkManager.getInstance(this).apply {
-                    cancelAllWork()
+                    //cancelAllWork()
                     enqueueUniquePeriodicWork(WORKER_TAG, ExistingPeriodicWorkPolicy.KEEP, updateWorker)
                 }
             }
