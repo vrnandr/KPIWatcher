@@ -21,7 +21,9 @@ const val WORKER_TAG = "updateKPI"
 class KpiApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+
         Repository.initialize(this)
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             val channelKPIChanged = NotificationChannel(NOTIFICATION_CHANNEL_KPI_CHANGE, getString(R.string.notification_channel_kpi_change), NotificationManager.IMPORTANCE_DEFAULT)
             //val channelWorker = NotificationChannel(NOTIFICATION_CHANNEL_WORKER, getString(R.string.notification_channel_worker), NotificationManager.IMPORTANCE_DEFAULT)
@@ -30,17 +32,14 @@ class KpiApplication : Application() {
             //notificationManager.createNotificationChannel(channelWorker)
         }
 
-        /*val repo = Repository.get()
-        val updateWorker = PeriodicWorkRequestBuilder<UpdateWorker>(repo.getTimer(), TimeUnit.MINUTES).build()
-        WorkManager.getInstance(this).apply {
-            cancelAllWork()
-            enqueueUniquePeriodicWork(WORKER_TAG, ExistingPeriodicWorkPolicy.KEEP,updateWorker)
-        }*/
-
-        if(BuildConfig.DEBUG){
+        if (BuildConfig.DEBUG){
             Timber.plant(MyDebugTree())
         }
-        Timber.plant(MyFileLoggerTree())
+
+        val repo = Repository.get()
+        if (repo.enableLogging()){
+            Timber.plant(MyFileLoggerTree())
+        }
     }
 }
 

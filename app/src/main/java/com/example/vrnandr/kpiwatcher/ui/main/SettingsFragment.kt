@@ -16,8 +16,6 @@ import java.util.concurrent.TimeUnit
 class SettingsFragment : PreferenceFragmentCompat() {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        //preferenceManager.sharedPreferencesName = "settings11"
-       // preferenceManager.sharedPreferencesMode = Context.MODE_PRIVATE
         setPreferencesFromResource(R.xml.root_preferences, rootKey)
 
         val timer = findPreference<EditTextPreference>("timer")
@@ -34,6 +32,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
 
         val refreshMethod = findPreference<ListPreference>("refresh_method")
+        timer?.isEnabled = refreshMethod?.value != "off"
         refreshMethod?.setOnPreferenceChangeListener { _, newValue ->
             when (newValue){
                 "off" -> {

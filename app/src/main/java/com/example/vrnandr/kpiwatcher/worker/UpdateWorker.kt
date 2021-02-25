@@ -22,7 +22,7 @@ class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worke
         val hour = (Calendar.getInstance()).get(Calendar.HOUR_OF_DAY)
         val day = (Calendar.getInstance()).get(Calendar.DAY_OF_WEEK)
         if (day in Calendar.MONDAY..Calendar.FRIDAY){
-            if (repo.getUseLogFile()){
+            if (repo.useLogFile()){
                 val lastString = lastDoneString()
                 if (lastString!=null || hour==8){ // обновляем если есть запись в лог файле о закрытом запросе и утром с 8:00 до 9:00
                     Timber.d("run kpiRequest on change log file")

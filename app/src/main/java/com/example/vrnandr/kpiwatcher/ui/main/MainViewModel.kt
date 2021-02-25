@@ -19,9 +19,6 @@ import java.util.concurrent.TimeUnit
 class MainViewModel: ViewModel() {
     private val repo = Repository.get()
     val responseKPE = repo.responseKPE
-    //val showErrorToast = repo.showErrorToast
-
-    val useLogFile = repo.getUseLogFile()
 
     val currentKpi : LiveData<Kpi> = repo.liveDataCurrentKPI
 
@@ -29,25 +26,7 @@ class MainViewModel: ViewModel() {
        repo.kpiRequest()
     }
 
-    private val _time = MutableLiveData<String>()
-    val time: LiveData<String>
-        get() = _time
-
     private val _messageToShow = MutableLiveData<String>()
     val messageToShow: LiveData<String>
         get() = _messageToShow
-
-    fun onStopWorkerClick (view: View){
-        _time.postValue(System.currentTimeMillis().toString())
-    }
-
-
-    //TODO убрать после перехода на настройки, также в xml убрать
-    /*fun onClick (view: View){
-        when(view.id){
-            R.id.useLogFile -> {
-                repo.setUseLogFile((view as CheckBox).isChecked)
-            }
-        }
-    }*/
 }

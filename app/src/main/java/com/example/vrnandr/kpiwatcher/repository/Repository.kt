@@ -104,7 +104,7 @@ class Repository private constructor(val context: Context) {
         spSettings.edit().putBoolean(USE_LOG_FILE,useLogFile).apply()
     }*/
 
-    fun getUseLogFile():Boolean{
+    fun useLogFile():Boolean{
         val refreshMethod = spSettings.getString(REFRESH_METHOD,null)
         return refreshMethod == "log_file"
         //return spSettings.getBoolean(ENABLE_LOGGING,false)
@@ -117,6 +117,10 @@ class Repository private constructor(val context: Context) {
     fun useWorker():Boolean{
         val refreshMethod = spSettings.getString(REFRESH_METHOD,null)
         return refreshMethod == "log_file" || refreshMethod == "periodic"
+    }
+
+    fun enableLogging():Boolean{
+        return spSettings.getBoolean(ENABLE_LOGGING,false)
     }
 
     fun setLastString(s: String?){

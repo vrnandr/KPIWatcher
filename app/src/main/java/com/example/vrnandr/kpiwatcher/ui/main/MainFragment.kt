@@ -51,8 +51,6 @@ class MainFragment : Fragment() {
         binding.lifecycleOwner = this
         binding.viewModel = viewModel
 
-        binding.useLogFile.isChecked = viewModel.useLogFile
-
         viewModel.messageToShow.observe(viewLifecycleOwner,{ showToast(it)})
 
         viewModel.currentKpi.observe(viewLifecycleOwner, { kpi ->
@@ -63,11 +61,6 @@ class MainFragment : Fragment() {
                     binding.message.text = kpiToColoredText(parsedKPI)
                 }
             }
-        })
-
-        viewModel.time.observe(viewLifecycleOwner, {
-            WorkManager.getInstance(requireContext()).cancelAllWork()
-            binding.stopWorkerButton.visibility = View.GONE
         })
 
         return binding.root
