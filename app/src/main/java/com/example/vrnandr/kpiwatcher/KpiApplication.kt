@@ -4,18 +4,12 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import com.example.vrnandr.kpiwatcher.logger.MyDebugTree
 import com.example.vrnandr.kpiwatcher.logger.MyFileLoggerTree
 import com.example.vrnandr.kpiwatcher.repository.Repository
-import com.example.vrnandr.kpiwatcher.worker.UpdateWorker
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 
 const val NOTIFICATION_CHANNEL_KPI_CHANGE = "Изменение КПЭ"
-//const val NOTIFICATION_CHANNEL_WORKER = ""
 const val WORKER_TAG = "updateKPI"
 
 class KpiApplication : Application() {
@@ -26,10 +20,8 @@ class KpiApplication : Application() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             val channelKPIChanged = NotificationChannel(NOTIFICATION_CHANNEL_KPI_CHANGE, getString(R.string.notification_channel_kpi_change), NotificationManager.IMPORTANCE_DEFAULT)
-            //val channelWorker = NotificationChannel(NOTIFICATION_CHANNEL_WORKER, getString(R.string.notification_channel_worker), NotificationManager.IMPORTANCE_DEFAULT)
             val notificationManager  = getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channelKPIChanged)
-            //notificationManager.createNotificationChannel(channelWorker)
         }
 
         if (BuildConfig.DEBUG){

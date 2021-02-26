@@ -62,24 +62,6 @@ class MainActivity : AppCompatActivity(), MainFragment.Callbacks, LoginFragment.
                 R.id.detailFragment, R.id.mainFragment, R.id.settingsFragment))
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
-
-        checkPermission()
-    }
-
-    private fun checkPermission() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-                requestPermissions(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE,android.Manifest.permission.WRITE_EXTERNAL_STORAGE),1)
-
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        //TODO разделить чтение/запись
-        if (!(grantResults.isNotEmpty()&&grantResults[0]==PackageManager.PERMISSION_GRANTED||grantResults[1]==PackageManager.PERMISSION_GRANTED)){
-            WorkManager.getInstance(this).cancelAllWork()
-            finish()
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun showDetail() {
