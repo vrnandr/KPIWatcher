@@ -79,8 +79,6 @@ class MainActivity : AppCompatActivity(), MainFragment.Callbacks, LoginFragment.
             WorkManager.getInstance(this).cancelAllWork()
             finish()
         }
-
-
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 

@@ -20,4 +20,8 @@
     <string name="timer_title">Период опроса, мин</string>
     <string name="refresh_title">Метод обновления КПЭ</string>
     <string name="enable_logging_title">Сохранять логи</string>
+    <string name="setting_menu_help">Помощь</string>
+    <!-- Диалог помощи -->
+    <string name="help_message">ну как-то так :)</string>
+    <string name="ok_button">Ок</string>
 </resources>

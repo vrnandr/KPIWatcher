@@ -1,7 +1,12 @@
 package com.example.vrnandr.kpiwatcher.ui.main
 
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.InputType
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import androidx.core.content.ContextCompat
 import androidx.preference.*
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
@@ -13,9 +18,13 @@ import com.example.vrnandr.kpiwatcher.worker.UpdateWorker
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
+private const val ID_READ_PERMISSION = 1
+private const val ID_WRITE_PERMISSION = 2
+
 class SettingsFragment : PreferenceFragmentCompat() {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        setHasOptionsMenu(true)
         setPreferencesFromResource(R.xml.root_preferences, rootKey)
 
         val timer = findPreference<EditTextPreference>("timer")
@@ -41,6 +50,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 "log_file" -> {
                     timer?.isEnabled = true
                     timer?.text = getString(R.string.min_timer)
+                    checkReadPermission()
                 }
                 "periodic" -> {
                     timer?.isEnabled = true
@@ -50,6 +60,15 @@ class SettingsFragment : PreferenceFragmentCompat() {
             //timer?.isEnabled = newValue != "off"
             true
         }
+
+        val enableLogging = findPreference<SwitchPreferenceCompat>("enable_logging")
+        enableLogging?.setOnPreferenceChangeListener { _, newValue ->
+            if (newValue as Boolean){
+                checkWritePermission()
+            }
+            true
+        }
+
         /*if (refreshMethod?.callChangeListener("log_file") == true)
             Toast.makeText(activity,list.value,Toast.LENGTH_SHORT).show()*/
 
@@ -87,6 +106,52 @@ class SettingsFragment : PreferenceFragmentCompat() {
             findPreference<EditTextPreference>("timer")?.isEnabled = value != "off"
         }*/
         return super.onPreferenceTreeClick(preference)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.settings_menu,menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId){
+            R.id.settingHelp -> {
+                showHelp()
+                true
+            }
+            else -> return super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun showHelp(){
+        val helpDialog = HelpDialogFragment()
+        helpDialog.show(childFragmentManager, "help_dialog")
+    }
+
+    private fun checkReadPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
+            if (activity?.let { ContextCompat.checkSelfPermission(it, android.Manifest.permission.READ_EXTERNAL_STORAGE) } != PackageManager.PERMISSION_GRANTED)
+                requestPermissions(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), ID_READ_PERMISSION)
+
+    }
+    private fun checkWritePermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
+            if (activity?.let { ContextCompat.checkSelfPermission(it, android.Manifest.permission.READ_EXTERNAL_STORAGE) } != PackageManager.PERMISSION_GRANTED)
+                requestPermissions(arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), ID_WRITE_PERMISSION)
+
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+
+        if (requestCode == ID_READ_PERMISSION && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_DENIED){
+            val refreshMethod = findPreference<ListPreference>("refresh_method")
+            refreshMethod?.value = "periodic"
+        }
+        if (requestCode == ID_WRITE_PERMISSION && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_DENIED){
+            val enableLogging = findPreference<SwitchPreferenceCompat>("enable_logging")
+            enableLogging?.isChecked = false
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
 }
