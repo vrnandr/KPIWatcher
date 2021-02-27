@@ -3,7 +3,9 @@ package com.example.vrnandr.kpiwatcher
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.pm.PackageManager
 import android.os.Build
+import androidx.core.content.ContextCompat
 import com.example.vrnandr.kpiwatcher.logger.MyDebugTree
 import com.example.vrnandr.kpiwatcher.logger.MyFileLoggerTree
 import com.example.vrnandr.kpiwatcher.repository.Repository
@@ -29,23 +31,24 @@ class KpiApplication : Application() {
         }
 
         val repo = Repository.get()
-        if (repo.enableLogging()){
+        val writePermission = ContextCompat.checkSelfPermission(this,android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+        if (repo.enableLogging() && writePermission){
             Timber.plant(MyFileLoggerTree())
         }
     }
 }
 
 //TODO
-// - настройки
+// + настройки
 // + детализация
-// - детализация с первого числа месяца
+// + детализация с первого числа месяца
 // + в нотификации первое значение и не равные 100
 // - в нотификации настроить интент
 // + переход на bottom чего-то там
 // + убрать отмену раннера при запуске приложения
-// - разнести разрешения на чтение и запись, запрашивать при нажатии на соответ. кнопку
+// + разнести разрешения на чтение и запись, запрашивать при нажатии на соответ. кнопку
 // + сохранять и выводить about из requestKPI()
 // - удалились данные для входа при не выполненом запросе
 // + иконки нотификации в зависимости от КПЭ
-// - toast при не изменившихся КПЭ
+// + toast при не изменившихся КПЭ
 // - добавить описание настроек

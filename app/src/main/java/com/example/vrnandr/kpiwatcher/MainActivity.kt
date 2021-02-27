@@ -28,12 +28,14 @@ class MainActivity : AppCompatActivity(), MainFragment.Callbacks, LoginFragment.
 
     private val repo = Repository.get()
     private val showErrorToast = repo.showErrorToast
+    private val showToast = repo.showToast
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
 
         showErrorToast.observe(this,{ showToast(it) })
+        showToast.observe(this,{ showToast(it) })
 
         val login = repo.getLogin()
         if (savedInstanceState == null) {

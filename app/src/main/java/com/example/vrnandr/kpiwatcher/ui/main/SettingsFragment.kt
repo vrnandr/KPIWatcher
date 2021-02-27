@@ -68,6 +68,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
             }
             true
         }
+        //проверить и выставить значения настроек в зависимости от runtime permissions
+        checkPermission()
 
         /*if (refreshMethod?.callChangeListener("log_file") == true)
             Toast.makeText(activity,list.value,Toast.LENGTH_SHORT).show()*/
@@ -128,6 +130,20 @@ class SettingsFragment : PreferenceFragmentCompat() {
         helpDialog.show(childFragmentManager, "help_dialog")
     }
 
+    private fun checkPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M){
+            if (activity?.let { ContextCompat.checkSelfPermission(it, android.Manifest.permission.READ_EXTERNAL_STORAGE) } != PackageManager.PERMISSION_GRANTED){
+                val refreshMethod = findPreference<ListPreference>("refresh_method")
+                if (refreshMethod?.value=="log_file")
+                    refreshMethod.value = "periodic"
+            }
+            if (activity?.let { ContextCompat.checkSelfPermission(it, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) } != PackageManager.PERMISSION_GRANTED){
+                val enableLogging = findPreference<SwitchPreferenceCompat>("enable_logging")
+                enableLogging?.isChecked = false
+            }
+        }
+    }
+
     private fun checkReadPermission() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
             if (activity?.let { ContextCompat.checkSelfPermission(it, android.Manifest.permission.READ_EXTERNAL_STORAGE) } != PackageManager.PERMISSION_GRANTED)
@@ -136,7 +152,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     }
     private fun checkWritePermission() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
-            if (activity?.let { ContextCompat.checkSelfPermission(it, android.Manifest.permission.READ_EXTERNAL_STORAGE) } != PackageManager.PERMISSION_GRANTED)
+            if (activity?.let { ContextCompat.checkSelfPermission(it, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) } != PackageManager.PERMISSION_GRANTED)
                 requestPermissions(arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), ID_WRITE_PERMISSION)
 
     }

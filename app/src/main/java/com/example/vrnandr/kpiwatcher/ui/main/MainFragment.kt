@@ -51,10 +51,9 @@ class MainFragment : Fragment() {
         binding.lifecycleOwner = this
         binding.viewModel = viewModel
 
-        viewModel.messageToShow.observe(viewLifecycleOwner,{ showToast(it)})
-
         viewModel.currentKpi.observe(viewLifecycleOwner, { kpi ->
             Timber.d("KPI: $kpi")
+            hideProgressBar()
             kpi?.let{
                 if(binding.viewModel is MainViewModel){
                     val parsedKPI = convertKPI(it.kpi)
@@ -62,6 +61,8 @@ class MainFragment : Fragment() {
                 }
             }
         })
+
+        viewModel.showToast.observe(viewLifecycleOwner, { hideProgressBar()})
 
         return binding.root
     }
@@ -83,9 +84,10 @@ class MainFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        binding.message.setOnClickListener { callbacks?.showDetail() }
-        //TODO remove
-        //binding.useLogFile.setOnClickListener { viewModel.onClick(binding.useLogFile) }
+        binding.updateButton.setOnClickListener {
+            showProgressBar()
+            viewModel.onKPIButtonClick()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -103,8 +105,14 @@ class MainFragment : Fragment() {
         }
     }
 
-    private fun showToast(msg:String){
-        Toast.makeText(activity,msg, Toast.LENGTH_SHORT).show()
+    private fun showProgressBar(){
+        binding.progressBar.visibility = View.VISIBLE
+        binding.updateButton.isEnabled = false
+    }
+
+    private fun hideProgressBar(){
+        binding.progressBar.visibility = View.GONE
+        binding.updateButton.isEnabled = true
     }
 
 }

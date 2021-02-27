@@ -19,14 +19,11 @@ import java.util.concurrent.TimeUnit
 class MainViewModel: ViewModel() {
     private val repo = Repository.get()
     val responseKPE = repo.responseKPE
+    val showToast = repo.showToast
 
     val currentKpi : LiveData<Kpi> = repo.liveDataCurrentKPI
 
-    fun onKPIButtonClick (view : View){
+    fun onKPIButtonClick (){
        repo.kpiRequest()
     }
-
-    private val _messageToShow = MutableLiveData<String>()
-    val messageToShow: LiveData<String>
-        get() = _messageToShow
 }

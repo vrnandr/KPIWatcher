@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.preference.PreferenceManager
+import com.example.vrnandr.kpiwatcher.R
 import com.example.vrnandr.kpiwatcher.repository.database.Kpi
 import com.example.vrnandr.kpiwatcher.repository.database.KpiDatabase
 import com.example.vrnandr.kpiwatcher.repository.network.Api
@@ -142,6 +143,10 @@ class Repository private constructor(val context: Context) {
     val showErrorToast: LiveData<String>
         get() = _showErrorToast
 
+    private val _showToast = MutableLiveData<String>()
+    val showToast: LiveData<String>
+        get() = _showToast
+
     private val _responseKPE = MutableLiveData<String>()
     val responseKPE: LiveData<String>
         get() = _responseKPE
@@ -258,6 +263,7 @@ class Repository private constructor(val context: Context) {
                                                 val kpi = Kpi(System.currentTimeMillis(), login, kpiString)
                                                 CoroutineScope(Dispatchers.IO).launch { addKpi(kpi) }
                                             } else{
+                                                _showToast.value = context.getString(R.string.kpi_didnt_change)
                                                 Timber.d("onResponse: kpi equals, not insert")
                                             }
                                         }

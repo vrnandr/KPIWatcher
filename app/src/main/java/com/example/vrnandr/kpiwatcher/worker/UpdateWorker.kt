@@ -1,7 +1,9 @@
 package com.example.vrnandr.kpiwatcher.worker
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Environment
+import androidx.core.content.ContextCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.vrnandr.kpiwatcher.repository.Repository
@@ -21,8 +23,13 @@ class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worke
         Timber.d("run worker")
         val hour = (Calendar.getInstance()).get(Calendar.HOUR_OF_DAY)
         val day = (Calendar.getInstance()).get(Calendar.DAY_OF_WEEK)
+        val readPermission = ContextCompat.checkSelfPermission(context, android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
         if (day in Calendar.MONDAY..Calendar.FRIDAY){
             if (repo.useLogFile()){
+                if (!readPermission){
+                    Timber.d("no permission to read SD")
+                    return Result.success()
+                }
                 val lastString = lastDoneString()
                 if (lastString!=null || hour==8){ // обновляем если есть запись в лог файле о закрытом запросе и утром с 8:00 до 9:00
                     Timber.d("run kpiRequest on change log file")
