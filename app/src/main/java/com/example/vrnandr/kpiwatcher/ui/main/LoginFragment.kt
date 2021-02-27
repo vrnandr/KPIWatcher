@@ -37,7 +37,7 @@ class LoginFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
         binding = LoginFragmentBinding.inflate(inflater)
         binding.lifecycleOwner = this
         binding.viewModel = viewModel
@@ -61,7 +61,6 @@ class LoginFragment : Fragment() {
     override fun onStart() {
         binding.login.setOnClickListener {
             exit = true
-            //val login = binding.loginEditText.text.toString().padStart(10,'0')
             val login = binding.loginEditText.text.toString()
             val password = binding.passwordEditText.text.toString().toUpperCase(Locale.getDefault()).filter { !it.isWhitespace() }
             binding.loginEditText.setText(login)

@@ -15,7 +15,6 @@ import java.util.*
 const val REQUEST_CLOSE_PHRASE = "Статус изменен на \\\"Выполнен\\\""
 private const val OSK_DIRECTORY="OSKMobile"
 private const val MINUTES_TO_UPDATE_KPI_ON_SITE = 16
-private const val USE_LOG_TO_UPDATE = true
 
 class UpdateWorker(val context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
     private val repo = Repository.get()

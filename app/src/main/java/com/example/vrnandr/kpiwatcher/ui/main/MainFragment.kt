@@ -1,7 +1,6 @@
 package com.example.vrnandr.kpiwatcher.ui.main
 
 import android.content.Context
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Spannable
@@ -9,14 +8,12 @@ import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
 import android.view.*
-import android.widget.Toast
-import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.work.WorkManager
 import com.example.vrnandr.kpiwatcher.R
 import com.example.vrnandr.kpiwatcher.databinding.MainFragmentBinding
-import com.example.vrnandr.kpiwatcher.utility.*
+import com.example.vrnandr.kpiwatcher.utility.ParsedKPI
+import com.example.vrnandr.kpiwatcher.utility.convertKPI
 import timber.log.Timber
 
 class MainFragment : Fragment() {

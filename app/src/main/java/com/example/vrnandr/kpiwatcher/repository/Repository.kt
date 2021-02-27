@@ -26,8 +26,6 @@ private const val LOGIN_FAILURE = "Incorrect username or password"
 private const val KPI_NOT_FOUND ="КПЭ не найдены"
 
 private const val CREDENTIALS = "credentials"
-private const val SETTINGS = "settings"
-private const val USE_LOG_FILE = "use_log_file"
 private const val ENABLE_LOGGING = "enable_logging"
 private const val REFRESH_METHOD = "refresh_method"
 
@@ -35,7 +33,6 @@ private const val LAST_FIND_STRING = "last_find_string"
 private const val TIMER = "timer"
 private const val ABOUT = "about"
 
-private const val TIMER_ON_LOG_FILE = 15L //минуты при обновлении по анализу лога МС
 const val DEFAULT_TIMER_LONG = 60L //минуты при обновлении по расписанию
 private const val DEFAULT_TIMER_STRING = "60"
 
@@ -55,7 +52,6 @@ class Repository private constructor(val context: Context) {
     }
 
     private val spCredentials = context.getSharedPreferences(CREDENTIALS, Context.MODE_PRIVATE)
-    //private val spSettings = context.getSharedPreferences(SETTINGS, Context.MODE_PRIVATE)
     private val spSettings = PreferenceManager.getDefaultSharedPreferences(context)
 
     private val dao by lazy { KpiDatabase.getInstance(context.applicationContext).kpiDao  }
@@ -95,15 +91,6 @@ class Repository private constructor(val context: Context) {
     fun deleteCredentials(){
         spCredentials.edit().putString(LOGIN,null).putString(PASSWORD,null).apply()
     }
-
-    //TODO remove on settings
-    /*fun setUseLogFile(useLogFile:Boolean){
-        if (useLogFile)
-            spSettings.edit().putLong(TIMER, TIMER_ON_LOG_FILE).apply()
-        else
-            spSettings.edit().putLong(TIMER, DEFAULT_TIMER_LONG).apply()
-        spSettings.edit().putBoolean(USE_LOG_FILE,useLogFile).apply()
-    }*/
 
     fun useLogFile():Boolean{
         val refreshMethod = spSettings.getString(REFRESH_METHOD,null)
@@ -160,7 +147,6 @@ class Repository private constructor(val context: Context) {
     val successLogin: LiveData<Boolean>
         get() = _successLogin
 
-    private var reopenLoginPage = true
     private var _csrf:String =""
     fun openLoginPage(login: String, password: String) {
         clearCookies()

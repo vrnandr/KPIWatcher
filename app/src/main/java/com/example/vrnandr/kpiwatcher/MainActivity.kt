@@ -1,12 +1,8 @@
 package com.example.vrnandr.kpiwatcher
 
-import android.content.pm.PackageManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -20,9 +16,7 @@ import com.example.vrnandr.kpiwatcher.ui.main.LoginFragment
 import com.example.vrnandr.kpiwatcher.ui.main.MainFragment
 import com.example.vrnandr.kpiwatcher.worker.UpdateWorker
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import timber.log.Timber
 import java.util.concurrent.TimeUnit
-import java.util.jar.Manifest
 
 class MainActivity : AppCompatActivity(), MainFragment.Callbacks, LoginFragment.Callbacks {
 

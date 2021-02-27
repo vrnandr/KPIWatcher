@@ -42,7 +42,7 @@ interface NetworkApi {
                      @Field("Login[rememberMe]") rememberMeString: String):Call<String>
 }
 
-class Api(val application: Application) {
+class Api(private val application: Application) {
 
     val retrofitService :NetworkApi by lazy {
 
