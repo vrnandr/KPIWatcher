@@ -1,8 +1,10 @@
 package com.example.vrnandr.kpiwatcher
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -23,6 +25,8 @@ class MainActivity : AppCompatActivity(), MainFragment.Callbacks, LoginFragment.
     private val repo = Repository.get()
     private val showErrorToast = repo.showErrorToast
     private val showToast = repo.showToast
+
+    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,11 +57,21 @@ class MainActivity : AppCompatActivity(), MainFragment.Callbacks, LoginFragment.
         val navView: BottomNavigationView =findViewById(R.id.nav_view)
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        val navController = navHostFragment.navController
+        navController = navHostFragment.navController
         val appBarConfiguration = AppBarConfiguration(setOf(
                 R.id.detailFragment, R.id.mainFragment, R.id.settingsFragment))
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            if(destination.parent?.id == R.id.loginFragment) {
+                navView.visibility = View.GONE
+            } else {
+                navView.visibility = View.VISIBLE
+            }
+        }
+
+
     }
 
     override fun showDetail() {
@@ -68,10 +82,12 @@ class MainActivity : AppCompatActivity(), MainFragment.Callbacks, LoginFragment.
     }
 
     override fun logout() {
-        repo.deleteCredentials()
-        supportFragmentManager.beginTransaction()
+        //todo вернуть как будет работать навигация
+        //repo.deleteCredentials()
+        navController.navigate(R.id.action_mainFragment_to_loginFragment)
+        /*supportFragmentManager.beginTransaction()
                 .replace(R.id.container, LoginFragment.newInstance())
-                .commitNow()
+                .commitNow()*/
     }
 
     override fun onLogin() {

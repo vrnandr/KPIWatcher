@@ -6,7 +6,11 @@
     <fragment
         android:id="@+id/mainFragment"
         android:name="com.example.vrnandr.kpiwatcher.ui.main.MainFragment"
-        android:label="@string/main_bottom_page" />
+        android:label="@string/main_bottom_page" >
+        <action
+            android:id="@+id/action_mainFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+    </fragment>
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.example.vrnandr.kpiwatcher.ui.main.SettingsFragment"
@@ -15,4 +19,12 @@
         android:id="@+id/detailFragment"
         android:name="com.example.vrnandr.kpiwatcher.ui.main.DetailFragment"
         android:label="@string/chart_bottom_page" />
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.vrnandr.kpiwatcher.ui.main.LoginFragment"
+        android:label="LoginFragment" >
+        <action
+            android:id="@+id/action_loginFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
+    </fragment>
 </navigation>
