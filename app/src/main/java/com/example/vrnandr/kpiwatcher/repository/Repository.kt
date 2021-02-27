@@ -34,6 +34,7 @@ private const val TIMER = "timer"
 private const val ABOUT = "about"
 
 const val DEFAULT_TIMER_LONG = 60L //минуты при обновлении по расписанию
+const val MIN_TIMER_LONG = 15L //минимальный интервал запуска воркеров
 private const val DEFAULT_TIMER_STRING = "60"
 
 class Repository private constructor(val context: Context) {

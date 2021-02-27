@@ -1,4 +1,5 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory app:title="@string/kpi_header">
 
@@ -7,6 +8,7 @@
             app:entries="@array/refresh_entries"
             app:entryValues="@array/refresh_values"
             app:key="refresh_method"
+            android:defaultValue="periodic"
             app:title="@string/refresh_title"
             app:useSimpleSummaryProvider="true" />
 
@@ -24,7 +26,8 @@
 
         <SwitchPreferenceCompat
             app:key="enable_logging"
-            app:title="@string/enable_logging_title" />
+            app:title="@string/enable_logging_title"
+            android:defaultValue="false"/>
 
     </PreferenceCategory>
 
