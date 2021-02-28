@@ -1,5 +1,6 @@
 package com.example.vrnandr.kpiwatcher
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -13,14 +14,11 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.vrnandr.kpiwatcher.repository.Repository
-import com.example.vrnandr.kpiwatcher.ui.main.DetailFragment
-import com.example.vrnandr.kpiwatcher.ui.main.LoginFragment
-import com.example.vrnandr.kpiwatcher.ui.main.MainFragment
 import com.example.vrnandr.kpiwatcher.worker.UpdateWorker
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.util.concurrent.TimeUnit
 
-class MainActivity : AppCompatActivity(), MainFragment.Callbacks, LoginFragment.Callbacks {
+class MainActivity : AppCompatActivity() {
 
     private val repo = Repository.get()
     private val showErrorToast = repo.showErrorToast
@@ -28,6 +26,7 @@ class MainActivity : AppCompatActivity(), MainFragment.Callbacks, LoginFragment.
 
     private lateinit var navController: NavController
 
+    @SuppressLint("RestrictedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
@@ -46,7 +45,6 @@ class MainActivity : AppCompatActivity(), MainFragment.Callbacks, LoginFragment.
         val login = repo.getLogin()
         if (savedInstanceState == null) {
             if (login == null){
-                //todo убрать кнопку назад
                 navController.navigate(R.id.action_mainFragment_to_loginFragment)
             } else if (repo.useWorker()) {
                 val updateWorker = PeriodicWorkRequestBuilder<UpdateWorker>(repo.getTimer(), TimeUnit.MINUTES).build()
@@ -60,24 +58,14 @@ class MainActivity : AppCompatActivity(), MainFragment.Callbacks, LoginFragment.
         navController.addOnDestinationChangedListener { _, destination, _ ->
             if(destination.id == R.id.loginFragment) {
                 navView.visibility = View.GONE
+                supportActionBar?.setShowHideAnimationEnabled(false)
                 supportActionBar?.hide()
             } else {
                 navView.visibility = View.VISIBLE
+                supportActionBar?.setShowHideAnimationEnabled(true)
                 supportActionBar?.show()
             }
         }
-    }
-
-    override fun logout() {
-        //todo вернуть как будет работать навигация
-        //repo.deleteCredentials()
-        navController.popBackStack(R.id.mainFragment,true)
-        navController.navigate(R.id.loginFragment)
-
-    }
-
-    override fun onLogin() {
-        navController.navigate(R.id.action_loginFragment_to_mainFragment)
     }
 
     private fun showToast(msg:String){

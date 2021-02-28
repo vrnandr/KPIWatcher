@@ -1,6 +1,5 @@
 package com.example.vrnandr.kpiwatcher.ui.main
 
-import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Spannable
@@ -10,6 +9,7 @@ import android.text.style.ForegroundColorSpan
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.example.vrnandr.kpiwatcher.R
 import com.example.vrnandr.kpiwatcher.databinding.MainFragmentBinding
 import com.example.vrnandr.kpiwatcher.utility.ParsedKPI
@@ -19,25 +19,7 @@ import timber.log.Timber
 class MainFragment : Fragment() {
 
     private lateinit var binding: MainFragmentBinding
-    private var callbacks: Callbacks? = null
     private val viewModel: MainViewModel by lazy { ViewModelProvider(this).get(MainViewModel::class.java) }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        callbacks = context as Callbacks
-    }
-
-    companion object {
-        fun newInstance() = MainFragment()
-    }
-    interface Callbacks {
-        fun logout()
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        callbacks = null
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -94,7 +76,8 @@ class MainFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId){
             R.id.logout -> {
-                callbacks?.logout()
+                viewModel.deleteCredentials()
+                findNavController().navigate(R.id.action_mainFragment_to_loginFragment)
                 true
             }
             else -> return super.onOptionsItemSelected(item)

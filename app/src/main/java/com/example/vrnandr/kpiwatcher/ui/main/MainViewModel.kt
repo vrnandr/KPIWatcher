@@ -16,4 +16,8 @@ class MainViewModel: ViewModel() {
     fun onKPIButtonClick (){
        repo.kpiRequest()
     }
+
+    fun deleteCredentials(){
+        repo.deleteCredentials()
+    }
 }
