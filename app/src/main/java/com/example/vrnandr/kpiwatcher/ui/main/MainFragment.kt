@@ -31,7 +31,6 @@ class MainFragment : Fragment() {
         fun newInstance() = MainFragment()
     }
     interface Callbacks {
-        fun showDetail()
         fun logout()
     }
 

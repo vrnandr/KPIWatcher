@@ -35,27 +35,7 @@ class MainActivity : AppCompatActivity(), MainFragment.Callbacks, LoginFragment.
         showErrorToast.observe(this,{ showToast(it) })
         showToast.observe(this,{ showToast(it) })
 
-        val login = repo.getLogin()
-        if (savedInstanceState == null) {
-            if (login!=null && repo.useWorker()) {
-                val updateWorker = PeriodicWorkRequestBuilder<UpdateWorker>(repo.getTimer(), TimeUnit.MINUTES).build()
-                WorkManager.getInstance(this).apply {
-                    //cancelAllWork()
-                    enqueueUniquePeriodicWork(WORKER_TAG, ExistingPeriodicWorkPolicy.KEEP, updateWorker)
-                }
-            }
-            /*    supportFragmentManager.beginTransaction()
-                    .replace(R.id.container, MainFragment.newInstance())
-                    .commitNow()
-            } else {
-                supportFragmentManager.beginTransaction()
-                    .replace(R.id.container, LoginFragment.newInstance())
-                    .commitNow()
-            }*/
-        }
-
-        val navView: BottomNavigationView =findViewById(R.id.nav_view)
-
+        val navView: BottomNavigationView = findViewById(R.id.nav_view)
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
         val appBarConfiguration = AppBarConfiguration(setOf(
@@ -63,37 +43,41 @@ class MainActivity : AppCompatActivity(), MainFragment.Callbacks, LoginFragment.
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
-        navController.addOnDestinationChangedListener { _, destination, _ ->
-            if(destination.parent?.id == R.id.loginFragment) {
-                navView.visibility = View.GONE
-            } else {
-                navView.visibility = View.VISIBLE
+        val login = repo.getLogin()
+        if (savedInstanceState == null) {
+            if (login == null){
+                //todo убрать кнопку назад
+                navController.navigate(R.id.action_mainFragment_to_loginFragment)
+            } else if (repo.useWorker()) {
+                val updateWorker = PeriodicWorkRequestBuilder<UpdateWorker>(repo.getTimer(), TimeUnit.MINUTES).build()
+                WorkManager.getInstance(this).apply {
+                    //cancelAllWork()
+                    enqueueUniquePeriodicWork(WORKER_TAG, ExistingPeriodicWorkPolicy.KEEP, updateWorker)
+                }
             }
         }
 
-
-    }
-
-    override fun showDetail() {
-        supportFragmentManager.beginTransaction()
-                .replace(R.id.container, DetailFragment.newInstance())
-                .addToBackStack(null)
-                .commit()
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            if(destination.id == R.id.loginFragment) {
+                navView.visibility = View.GONE
+                supportActionBar?.hide()
+            } else {
+                navView.visibility = View.VISIBLE
+                supportActionBar?.show()
+            }
+        }
     }
 
     override fun logout() {
         //todo вернуть как будет работать навигация
         //repo.deleteCredentials()
-        navController.navigate(R.id.action_mainFragment_to_loginFragment)
-        /*supportFragmentManager.beginTransaction()
-                .replace(R.id.container, LoginFragment.newInstance())
-                .commitNow()*/
+        navController.popBackStack(R.id.mainFragment,true)
+        navController.navigate(R.id.loginFragment)
+
     }
 
     override fun onLogin() {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.container, MainFragment.newInstance())
-            .commitNow()
+        navController.navigate(R.id.action_loginFragment_to_mainFragment)
     }
 
     private fun showToast(msg:String){
