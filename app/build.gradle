@@ -3,6 +3,8 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-android-extensions'
     id 'kotlin-kapt'
+    id 'com.google.gms.google-services'
+
 }
 
 apply plugin: 'com.google.firebase.crashlytics'
@@ -14,8 +16,8 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.example.vrnandr.KPIWatcher"
-        minSdkVersion 22
+        applicationId "com.example.vrnandr.kpiwatcher"
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
         versionName "0.1"
@@ -23,7 +25,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

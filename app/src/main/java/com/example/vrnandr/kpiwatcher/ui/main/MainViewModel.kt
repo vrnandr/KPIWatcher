@@ -12,6 +12,7 @@ class MainViewModel: ViewModel() {
     val showToast = repo.showToast
 
     val currentKpi : LiveData<Kpi> = repo.liveDataCurrentKPI
+    val successKPIRequest = repo.successKPIRequest
 
     fun onKPIButtonClick (){
        repo.kpiRequest()

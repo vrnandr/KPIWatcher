@@ -32,8 +32,6 @@ class LoginFragment : Fragment() {
             if (exit){
                 if (it){
                     findNavController().navigate(R.id.action_loginFragment_to_mainFragment)
-                } else {
-                    Toast.makeText(activity,"Incorrect username or password", Toast.LENGTH_SHORT).show()
                 }
             }
         })

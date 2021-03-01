@@ -148,6 +148,11 @@ class Repository private constructor(val context: Context) {
     val successLogin: LiveData<Boolean>
         get() = _successLogin
 
+    private val _successKPIRequest = MutableLiveData<Boolean>()
+    val successKPIRequest: LiveData<Boolean>
+        get() = _successKPIRequest
+
+
     private var _csrf:String =""
     fun openLoginPage(login: String, password: String) {
         clearCookies()
@@ -155,6 +160,7 @@ class Repository private constructor(val context: Context) {
         networkApi.retrofitService.login().enqueue(object : Callback<String> {
             override fun onFailure(call: Call<String>, t: Throwable) {
                 _showErrorToast.value = "Failure on open login page: ${t.message}"
+                _successLogin.postValue(false)
                 Timber.d("Failure on open login page: ${t.message}")
             }
 
@@ -172,6 +178,7 @@ class Repository private constructor(val context: Context) {
                             }
                     } catch (e:Exception){
                         _showErrorToast.value = "Error on parse login page HTML: ${e.message}"
+                        _successLogin.postValue(false)
                         Timber.d("Error on parse login page HTML: ${e.message}")
                     }
                 }
@@ -184,6 +191,7 @@ class Repository private constructor(val context: Context) {
                 Callback<String> {
             override fun onFailure(call: Call<String>, t: Throwable) {
                 _showErrorToast.value = "Failure on login: ${t.message}"
+                _successLogin.postValue(false)
                 Timber.d("Failure on login: ${t.message}")
             }
 
@@ -199,11 +207,12 @@ class Repository private constructor(val context: Context) {
                         if (result.contains(LOGIN_FAILURE)) {
                             _successLogin.postValue(false)
                             deleteCredentials()
-                            _showErrorToast.value = "Login error"
+                            _showErrorToast.value = "Данные для входа не корректны"
                             Timber.d("login unsuccessful")
                             Timber.d(result)
                         } else {
                             Timber.d("WTF it can`t be")
+                            _successLogin.postValue(false)
                             Timber.d(result)
                         }
                     }
@@ -224,12 +233,16 @@ class Repository private constructor(val context: Context) {
                         result?.let {
                             try {
                                 //если в теле ответа есть текст "Вход" значит что-то пошло не так и надо снова выполнить логин, если нет парсим страницу
-                                if (result.contains(LOGIN_WORD))
+                                if (result.contains(LOGIN_WORD)){
+                                    _successKPIRequest.postValue(false)
                                     openLoginPage(login,password)
+                                }
+
                                 val doc = Jsoup.parse(it)
                                 val who = doc.select("h1.hyphens+p").first().text()
                                 val about = doc.select("h1.hyphens+p").next().text()
                                 if (!result.contains(KPI_NOT_FOUND)) {
+                                    _successKPIRequest.postValue(true)
                                     val elements = doc.select("div.circle-chart")
                                     val data = elements.eachAttr("data-value")
                                     val color = elements.eachAttr("data-color")
@@ -258,12 +271,14 @@ class Repository private constructor(val context: Context) {
                                     _responseKPE.value = "$who\n$about"
                                     setAbout("$who\n$about")
                                 } else {
+                                    _successKPIRequest.postValue(true)
                                     _responseKPE.value = "$who\n$about\n$KPI_NOT_FOUND"
                                     setAbout("$who\n$about\n$KPI_NOT_FOUND")
                                 }
 
                                 success = true
                             } catch (e: Exception) {
+                                _successKPIRequest.postValue(false)
                                 Timber.e("onResponse: Error on parse HTML: ${e.message}")
                                 _showErrorToast.value = "Error on parse HTML: " + e.message
                                 /*if (reopenLoginPage) {
@@ -273,16 +288,19 @@ class Repository private constructor(val context: Context) {
                             }
                         }
                     } else {
+                        _successKPIRequest.postValue(false)
                         Timber.e("onResponse: Response unsuccessful: ${response.message()}")
                         _showErrorToast.value = "Response unsuccessful: " + response.message()
                     }
                 }
                 override fun onFailure(call: Call<String>, t: Throwable) {
+                    _successKPIRequest.postValue(false)
                     Timber.e("onFailure: Failure: ${t.message}")
-                    _responseKPE.value = "Failure:" + t.message
+                    _showErrorToast.value = "Failure:" + t.message
                 }
             })
         } else {
+            _successKPIRequest.postValue(false)
             _showErrorToast.value = "Login or password is NULL or blank, kpi request not permitted \n Logout and login again"
             Timber.d("Login or password is NULL or blank, kpi request not permitted \n Logout and login again")
         }

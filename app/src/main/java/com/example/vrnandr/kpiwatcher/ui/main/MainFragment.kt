@@ -31,7 +31,6 @@ class MainFragment : Fragment() {
 
         viewModel.currentKpi.observe(viewLifecycleOwner, { kpi ->
             Timber.d("KPI: $kpi")
-            hideProgressBar()
             kpi?.let{
                 if(binding.viewModel is MainViewModel){
                     val parsedKPI = convertKPI(it.kpi)
@@ -39,6 +38,7 @@ class MainFragment : Fragment() {
                 }
             }
         })
+        viewModel.successKPIRequest.observe(viewLifecycleOwner, { hideProgressBar() })
 
         viewModel.showToast.observe(viewLifecycleOwner, { hideProgressBar()})
 
