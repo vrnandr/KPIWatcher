@@ -23,6 +23,8 @@ private const val BASE_URL = "http://oskinfotrans.ru/infoportal/"
 private const val PREF = "cookiesName"
 private const val DOMAIN = "domain"
 private const val COOKIE = "cookie"
+private const val CONNECT_TIMEOUT = 20L
+private const val READ_TIMEOUT = 30L
 
 interface NetworkApi {
     @GET("index.php?r=site%2Flogin")
@@ -47,12 +49,13 @@ class Api(private val application: Application) {
     val retrofitService :NetworkApi by lazy {
 
         val okHttpBuilder = OkHttpClient.Builder()
-                .connectTimeout(20, TimeUnit.SECONDS)
+                .connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(READ_TIMEOUT,TimeUnit.SECONDS)
                 .cookieJar(SessionCookieJar(application))
         if(BuildConfig.DEBUG){
             val interceptor = HttpLoggingInterceptor { message -> Timber.tag("okHttp").d(message) }
-            //interceptor.level = HttpLoggingInterceptor.Level.BASIC
-            interceptor.level = HttpLoggingInterceptor.Level.BODY
+            interceptor.level = HttpLoggingInterceptor.Level.BASIC
+            //interceptor.level = HttpLoggingInterceptor.Level.BODY
             okHttpBuilder.addInterceptor(interceptor)
         }
         val okHttpClient = okHttpBuilder.build()

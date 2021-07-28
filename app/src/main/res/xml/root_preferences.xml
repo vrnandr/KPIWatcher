@@ -4,18 +4,18 @@
     <PreferenceCategory app:title="@string/kpi_header">
 
         <ListPreference
-            app:defaultValue="periodic"
+            app:defaultValue="off"
             app:entries="@array/refresh_entries"
             app:entryValues="@array/refresh_values"
             app:key="refresh_method"
-            android:defaultValue="periodic"
+            android:defaultValue="off"
             app:title="@string/refresh_title"
             app:useSimpleSummaryProvider="true" />
 
         <EditTextPreference
             app:dependency="refresh_method"
             app:key="timer"
-            app:enabled="true"
+            app:enabled="false"
             app:defaultValue="60"
             app:title="@string/timer_title"
             app:useSimpleSummaryProvider="true" />

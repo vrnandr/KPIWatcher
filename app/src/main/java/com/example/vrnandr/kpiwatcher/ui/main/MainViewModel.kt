@@ -9,10 +9,11 @@ import com.example.vrnandr.kpiwatcher.repository.database.Kpi
 class MainViewModel: ViewModel() {
     private val repo = Repository.get()
     val responseKPE = repo.responseKPE
-    val showToast = repo.showToast
+    val showToastEvent = repo.showToastEvent
+    val showErrorToastEvent = repo.showErrorToastEvent
 
     val currentKpi : LiveData<Kpi> = repo.liveDataCurrentKPI
-    val successKPIRequest = repo.successKPIRequest
+    val successKPIRequestEvent = repo.successKPIRequestEvent
 
     fun onKPIButtonClick (){
        repo.kpiRequest()

@@ -30,6 +30,8 @@ class KpiApplication : Application() {
             Timber.plant(MyDebugTree())
         }
 
+
+        //дерево садится в настройках при клике на логе
         val repo = Repository.get()
         val writePermission = ContextCompat.checkSelfPermission(this,android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
         if (repo.enableLogging() && writePermission){
@@ -48,7 +50,7 @@ class KpiApplication : Application() {
 // + убрать отмену раннера при запуске приложения
 // + разнести разрешения на чтение и запись, запрашивать при нажатии на соответ. кнопку
 // + сохранять и выводить about из requestKPI()
-// - удалились данные для входа при не выполненом запросе
+// + удалились данные для входа при не выполненом запросе
 // + иконки нотификации в зависимости от КПЭ
 // + toast при не изменившихся КПЭ
 // + добавить описание настроек

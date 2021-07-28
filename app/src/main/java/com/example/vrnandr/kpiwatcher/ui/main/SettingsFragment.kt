@@ -13,6 +13,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.vrnandr.kpiwatcher.R
 import com.example.vrnandr.kpiwatcher.WORKER_TAG
+import com.example.vrnandr.kpiwatcher.logger.MyFileLoggerTree
 import com.example.vrnandr.kpiwatcher.repository.DEFAULT_TIMER_LONG
 import com.example.vrnandr.kpiwatcher.repository.MIN_TIMER_LONG
 import com.example.vrnandr.kpiwatcher.worker.UpdateWorker
@@ -63,11 +64,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
             }
             true
         }
-
+                //ВаранкинАНдрейАлексеевич
         enableLogging.setOnPreferenceChangeListener { _, newValue ->
-            if (newValue as Boolean){
+            if (newValue as Boolean)
                 checkWritePermission()
-            }
             true
         }
         //проверить и выставить значения настроек в зависимости от runtime permissions
@@ -97,6 +97,14 @@ class SettingsFragment : PreferenceFragmentCompat() {
                     Timber.d("worker on $timerLong minutes")
                 }
             }
+        }
+        if (enableLogging.isChecked){
+            Timber.plant(MyFileLoggerTree())
+            Timber.d("logging on")
+        } else {
+            Timber.d("logging off")
+            if (Timber.forest().contains(MyFileLoggerTree()))
+                Timber.uproot(MyFileLoggerTree())
         }
     }
 
@@ -142,7 +150,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
             if (activity?.let { ContextCompat.checkSelfPermission(it, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) } != PackageManager.PERMISSION_GRANTED)
                 requestPermissions(arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), ID_WRITE_PERMISSION)
-
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {

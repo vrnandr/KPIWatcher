@@ -38,9 +38,11 @@ class MainFragment : Fragment() {
                 }
             }
         })
-        viewModel.successKPIRequest.observe(viewLifecycleOwner, { hideProgressBar() })
+        viewModel.successKPIRequestEvent.observe(viewLifecycleOwner, { hideProgressBar() })
 
-        viewModel.showToast.observe(viewLifecycleOwner, { hideProgressBar()})
+        viewModel.showToastEvent.observe(viewLifecycleOwner, { hideProgressBar()})
+
+        viewModel.showErrorToastEvent.observe(viewLifecycleOwner, { hideProgressBar()})
 
         return binding.root
     }

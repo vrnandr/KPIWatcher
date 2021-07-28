@@ -21,8 +21,8 @@ import java.util.concurrent.TimeUnit
 class MainActivity : AppCompatActivity() {
 
     private val repo = Repository.get()
-    private val showErrorToast = repo.showErrorToast
-    private val showToast = repo.showToast
+    private val showErrorToastEvent = repo.showErrorToastEvent
+    private val showToastEvent = repo.showToastEvent
 
     private lateinit var navController: NavController
 
@@ -31,8 +31,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
 
-        showErrorToast.observe(this,{ showToast(it) })
-        showToast.observe(this,{ showToast(it) })
+        showErrorToastEvent.observe(this,{ showToast(it) })
+        showToastEvent.observe(this,{ showToast(it) })
 
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
@@ -42,17 +42,17 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
-        val login = repo.getLogin()
         if (savedInstanceState == null) {
-            if (login == null){
+            if (repo.getLogin() == null)
                 navController.navigate(R.id.action_mainFragment_to_loginFragment)
-            } else if (repo.useWorker()) {
-                val updateWorker = PeriodicWorkRequestBuilder<UpdateWorker>(repo.getTimer(), TimeUnit.MINUTES).build()
-                WorkManager.getInstance(this).apply {
-                    //cancelAllWork()
-                    enqueueUniquePeriodicWork(WORKER_TAG, ExistingPeriodicWorkPolicy.KEEP, updateWorker)
-                }
+            else
+                if (repo.useWorker()) {
+                    val updateWorker = PeriodicWorkRequestBuilder<UpdateWorker>(repo.getTimer(), TimeUnit.MINUTES).build()
+                    WorkManager.getInstance(this).
+                        enqueueUniquePeriodicWork(WORKER_TAG, ExistingPeriodicWorkPolicy.KEEP, updateWorker)
             }
+
+
         }
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
