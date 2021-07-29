@@ -36,4 +36,5 @@
         Лог файл – требуется разрешение на запись на карту памяти, лог-файлы (максимум 5) будут
         в каталоге KPIWatcher</string>
     <string name="ok_button">Ок</string>
+    <string name="incorrect_login_data">Данные для входа не корректны</string>
 </resources>

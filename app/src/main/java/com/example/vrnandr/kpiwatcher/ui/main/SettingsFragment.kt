@@ -77,11 +77,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     override fun onStop() {
         super.onStop()
-        if (startRefreshMethod!=refreshMethod.value || startTimer!=timer.text){
-            var timerLong = timer.text?.toLongOrNull()?: DEFAULT_TIMER_LONG
+        if (startRefreshMethod != refreshMethod.value || startTimer != timer.text) {
+            var timerLong = timer.text?.toLongOrNull() ?: DEFAULT_TIMER_LONG
             if (timerLong < 15) timerLong = MIN_TIMER_LONG
             //Timber.d("timer is $timer, refresh method is ${refreshMethod?.value}")
-            when (refreshMethod.value){
+            when (refreshMethod.value) {
                 "off" -> {
                     activity?.let {
                         WorkManager.getInstance(it).cancelAllWork()
@@ -98,15 +98,20 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 }
             }
         }
-        if (enableLogging.isChecked){
-            Timber.plant(MyFileLoggerTree())
-            Timber.d("logging on")
-        } else {
-            Timber.d("logging off")
-            if (Timber.forest().contains(MyFileLoggerTree()))
-                Timber.uproot(MyFileLoggerTree())
-        }
+//если нет дерева MyFileLogger и стоит галочка логировать, то включаем лог в файл, если галочки нет то выключаем логирование в файл
+        if (enableLogging.isChecked)
+            if (Timber.forest().find { it.javaClass == MyFileLoggerTree::class.java } == null) {
+                Timber.plant(MyFileLoggerTree())
+                Timber.d("logging on")
+            } else
+                Timber.forest().forEach {
+                    if (it.javaClass == MyFileLoggerTree::class.java) {
+                        Timber.d("logging off")
+                        Timber.uproot(it)
+                    }
+                }
     }
+
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)

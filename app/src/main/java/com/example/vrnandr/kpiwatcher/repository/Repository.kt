@@ -144,7 +144,7 @@ class Repository private constructor(val context: Context) {
         get() = _responseKPE
 
     init {
-        _responseKPE.value = getAbout()
+        _responseKPE.value = getAbout()?:""
     }
 
 
@@ -213,7 +213,7 @@ class Repository private constructor(val context: Context) {
                         if (result.contains(LOGIN_FAILURE)) {
                             _successLoginEvent.value = false
                             deleteCredentials()
-                            _showErrorToastEvent.value = "Данные для входа не корректны"
+                            _showErrorToastEvent.value = context.getString(R.string.incorrect_login_data)
                             Timber.d("login unsuccessful")
                             Timber.d(result)
                         } else {
