@@ -13,35 +13,55 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 class DetailViewModel :ViewModel() {
 
+    val colors = intArrayOf(Color.BLACK,Color.BLUE,Color.RED,Color.MAGENTA, Color.YELLOW,Color.GREEN, Color.DKGRAY)
+    val kpisTitle = mutableSetOf<String>()
+    private val repo = Repository.get()
+    val visibleKPI = repo.getChartKPI()
+
     fun getData(): LineData = runBlocking{
-        val repo = Repository.get()
-        val entriesZ = arrayListOf<Entry>()
-        val entriesS = arrayListOf<Entry>()
+
         val result = async { repo.userKPI() }
         val list = result.await()
+
         if (list.isNotEmpty()){
+
+            val map = mutableMapOf<String,ArrayList<Entry>>()
+
             for (entry in list){
                 val timestamp = entry.timestamp
                 val kpi = convertKPI(entry.kpi)
                 for (k in kpi){
-                    when(k.text){
-                        "Загруженность" -> entriesZ.add(Entry(timestamp.toFloat(),k.value.toFloat()))
-                        "Итоговый коэффициент" -> entriesS.add(Entry(timestamp.toFloat(),k.value.toFloat()))
-                    }
+                    if (map.keys.contains(k.text)){
+                        val aaa = map.getValue(k.text)
+                        aaa.add(Entry(timestamp.toFloat(),k.value.toFloat()))
+                        map[k.text] = aaa
+                    } else
+                        map[k.text] = arrayListOf(Entry(timestamp.toFloat(),k.value.toFloat()))
                 }
             }
-            val dataSetZ = LineDataSet(entriesZ,"Загруженность")
-            dataSetZ.color = Color.RED
-            val dataSetS = LineDataSet(entriesS,"Итоговый коэффициент")
-            dataSetS.color = Color.BLUE
-            val dataSet = arrayListOf<ILineDataSet>(dataSetS,dataSetZ)
+            //Timber.d(map.toString())
+            kpisTitle.addAll(map.keys)
+
+            val dataSet = arrayListOf<ILineDataSet>()
+            var i = 0
+            for (e in map){
+                val lds = LineDataSet(e.value,e.key)
+                lds.color = colors[i++ % colors.size]
+                lds.isVisible = visibleKPI.contains(e.key)
+                dataSet.add(lds)
+            }
 
             return@runBlocking LineData(dataSet)
         } else
             return@runBlocking LineData()
+    }
+
+    fun saveChartKPI(chartKPI: String){
+        repo.setChartKPI(chartKPI)
     }
 
     class MyXAxisFormatter: ValueFormatter(){

@@ -37,4 +37,6 @@
         в каталоге KPIWatcher</string>
     <string name="ok_button">Ок</string>
     <string name="incorrect_login_data">Данные для входа не корректны</string>
+    <string name="detail_fragment_settings">настройки</string>
+    <string name="detail_fragment_settings_title">Настройки графика</string>
 </resources>

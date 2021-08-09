@@ -79,6 +79,8 @@ class MainFragment : Fragment() {
         return when (item.itemId){
             R.id.logout -> {
                 viewModel.deleteCredentials()
+                binding.message.text = ""
+                binding.about.text = ""
                 findNavController().navigate(R.id.action_mainFragment_to_loginFragment)
                 true
             }

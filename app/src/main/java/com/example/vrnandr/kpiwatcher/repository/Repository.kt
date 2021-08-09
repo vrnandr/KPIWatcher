@@ -35,6 +35,8 @@ private const val LAST_FIND_STRING = "last_find_string"
 private const val TIMER = "timer"
 private const val ABOUT = "about"
 
+private const val CHART_KPI = "chart_kpi"
+
 const val DEFAULT_TIMER_LONG = 60L //минуты при обновлении по расписанию
 const val MIN_TIMER_LONG = 15L //минимальный интервал запуска воркеров
 private const val DEFAULT_TIMER_STRING = "60"
@@ -60,8 +62,12 @@ class Repository private constructor(val context: Context) {
     private val dao by lazy { KpiDatabase.getInstance(context.applicationContext).kpiDao  }
     private val networkApi by lazy { Api(context as Application) }
 
-    val liveDataCurrentKPI = dao.getLiveDataCurrentKPI()
-    suspend fun currentKPI() = dao.getCurrentKPI()
+    fun getLogin():String?{
+        return spCredentials.getString(LOGIN,null)
+    }
+
+    val liveDataCurrentKPI = dao.getLiveDataCurrentKPI(getLogin()?:"")
+    suspend fun currentKPI() = dao.getCurrentKPI(getLogin()?:"")
     suspend fun addKpi(kpi:Kpi) = dao.addKPI(kpi)
 
 
@@ -85,9 +91,7 @@ class Repository private constructor(val context: Context) {
     fun saveCredentials (login: String?, password: String?){
         spCredentials.edit().putString(LOGIN,login).putString(PASSWORD,password).apply()
     }
-    fun getLogin():String?{
-        return spCredentials.getString(LOGIN,null)
-    }
+
     private fun getPassword():String?{
         return spCredentials.getString(PASSWORD,null)
     }
@@ -128,6 +132,13 @@ class Repository private constructor(val context: Context) {
         return spSettings.getString(ABOUT,null)
     }
 
+    fun setChartKPI(s: String){
+        spSettings.edit().putString(CHART_KPI,s).apply()
+    }
+    fun getChartKPI(): String {
+        return spSettings.getString(CHART_KPI,"")?:""
+    }
+
     //<------
 
     private val _showErrorToastEvent = SingleLiveEvent<String>()
@@ -163,6 +174,8 @@ class Repository private constructor(val context: Context) {
     fun openLoginPage(login: String, password: String) {
         clearCookies()
         deleteCredentials()
+        _responseKPE.value = ""
+        //liveDataCurrentKPI.value = Kpi(System.currentTimeMillis(),"000","")
         networkApi.retrofitService.login().enqueue(object : Callback<String> {
             override fun onFailure(call: Call<String>, t: Throwable) {
                 _showErrorToastEvent.value = "Failure on open login page: ${t.message}"
