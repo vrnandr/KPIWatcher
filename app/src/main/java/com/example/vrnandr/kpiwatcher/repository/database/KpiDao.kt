@@ -11,8 +11,8 @@ interface KpiDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addKPI(kpi: Kpi)
 
-    @Query ("select * from kpi_table where personnel_number = :per_num order by timestamp desc limit 1")
-    fun getLiveDataCurrentKPI(per_num: String): LiveData<Kpi>
+    /*@Query ("select * from kpi_table where personnel_number = :per_num order by timestamp desc limit 1")
+    fun getLiveDataCurrentKPI(per_num: String): LiveData<Kpi>*/
 
     @Query ("select * from kpi_table where personnel_number = :per_num order by timestamp desc limit 1")
     suspend fun getCurrentKPI(per_num: String): Kpi?

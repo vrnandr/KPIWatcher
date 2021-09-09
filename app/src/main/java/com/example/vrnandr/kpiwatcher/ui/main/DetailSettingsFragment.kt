@@ -34,8 +34,12 @@ class DetailSettingsFragment:DialogFragment() {
 
             val listVisibleKPI = arrayListOf<Boolean>()
             if (titles != null && visibleKPI != null)
-                for (title in titles)
-                    listVisibleKPI.add(visibleKPI.contains(title))
+                for (title in titles){
+                    if (visibleKPI.isNotBlank())
+                        listVisibleKPI.add(visibleKPI.contains(title))
+                    else
+                        listVisibleKPI.add(true)
+                }
 
             val builder = AlertDialog.Builder(it)
             builder.setTitle(R.string.detail_fragment_settings_title)

@@ -1,9 +1,12 @@
 package com.example.vrnandr.kpiwatcher.utility
 
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.example.vrnandr.kpiwatcher.MainActivity
 import com.example.vrnandr.kpiwatcher.NOTIFICATION_CHANNEL_KPI_CHANGE
 import com.example.vrnandr.kpiwatcher.R
 
@@ -24,6 +27,12 @@ fun notify(context: Context, kpiString:String){
         "red" -> notificationIconColor = Color.RED
     }
     val idIcon = idIconForNotification(listKpi.first().value.toFloatOrNull()?:0f)
+
+    val intent = Intent(context,MainActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    }
+    val pendingIntent : PendingIntent = PendingIntent.getActivity(context,0,intent,0)
+
     val notification = NotificationCompat
             .Builder(context, NOTIFICATION_CHANNEL_KPI_CHANGE)
             .setSmallIcon(idIcon)
@@ -32,6 +41,7 @@ fun notify(context: Context, kpiString:String){
             .setColor(notificationIconColor)
             .setStyle(NotificationCompat.BigTextStyle()
                     .bigText(notificationText))
+            .setContentIntent(pendingIntent)
             .build()
     NotificationManagerCompat.from(context).notify(0, notification)
 }

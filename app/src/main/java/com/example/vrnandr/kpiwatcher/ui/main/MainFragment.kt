@@ -6,6 +6,7 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
+import android.util.TypedValue
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -14,6 +15,7 @@ import com.example.vrnandr.kpiwatcher.R
 import com.example.vrnandr.kpiwatcher.databinding.MainFragmentBinding
 import com.example.vrnandr.kpiwatcher.utility.ParsedKPI
 import com.example.vrnandr.kpiwatcher.utility.convertKPI
+import com.google.android.material.color.MaterialColors
 import timber.log.Timber
 
 class MainFragment : Fragment() {
@@ -28,15 +30,15 @@ class MainFragment : Fragment() {
         binding = MainFragmentBinding.inflate(inflater)
         binding.lifecycleOwner = this
         binding.viewModel = viewModel
-
         viewModel.currentKpi.observe(viewLifecycleOwner, { kpi ->
             Timber.d("KPI: $kpi")
-            kpi?.let{
+            if (kpi !=null) {
                 if(binding.viewModel is MainViewModel){
-                    val parsedKPI = convertKPI(it.kpi)
+                    val parsedKPI = convertKPI(kpi.kpi)
                     binding.message.text = kpiToColoredText(parsedKPI)
                 }
-            }
+            } else
+                binding.message.text = "..."
         })
         viewModel.successKPIRequestEvent.observe(viewLifecycleOwner, { hideProgressBar() })
 

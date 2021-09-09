@@ -12,8 +12,16 @@ class MainViewModel: ViewModel() {
     val showToastEvent = repo.showToastEvent
     val showErrorToastEvent = repo.showErrorToastEvent
 
-    val currentKpi : LiveData<Kpi> = repo.liveDataCurrentKPI
+    val currentKpi : LiveData<Kpi?> = repo.currentKPI
     val successKPIRequestEvent = repo.successKPIRequestEvent
+
+    init {
+        repo.getCurrentKPI()
+    }
+
+    fun getCurrentKPI(){
+        repo.getCurrentKPI()
+    }
 
     fun onKPIButtonClick (){
        repo.kpiRequest()

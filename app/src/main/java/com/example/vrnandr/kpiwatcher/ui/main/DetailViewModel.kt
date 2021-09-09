@@ -17,10 +17,10 @@ import kotlin.collections.ArrayList
 
 class DetailViewModel :ViewModel() {
 
-    val colors = intArrayOf(Color.BLACK,Color.BLUE,Color.RED,Color.MAGENTA, Color.YELLOW,Color.GREEN, Color.DKGRAY)
+    private val colors = intArrayOf(Color.GREEN,Color.CYAN,Color.RED,Color.MAGENTA, Color.YELLOW,Color.BLUE, Color.DKGRAY)
     val kpisTitle = mutableSetOf<String>()
     private val repo = Repository.get()
-    val visibleKPI = repo.getChartKPI()
+    fun visibleKPI() = repo.getChartKPI()
 
     fun getData(): LineData = runBlocking{
 
@@ -48,10 +48,12 @@ class DetailViewModel :ViewModel() {
 
             val dataSet = arrayListOf<ILineDataSet>()
             var i = 0
+            val visibleKPIs = visibleKPI()
             for (e in map){
                 val lds = LineDataSet(e.value,e.key)
                 lds.color = colors[i++ % colors.size]
-                lds.isVisible = visibleKPI.contains(e.key)
+                if (visibleKPIs.isNotBlank())
+                    lds.isVisible = visibleKPIs.contains(e.key)
                 dataSet.add(lds)
             }
 

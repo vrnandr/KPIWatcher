@@ -3,13 +3,15 @@ package com.example.vrnandr.kpiwatcher.repository
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.preference.PreferenceManager
 import com.example.vrnandr.kpiwatcher.R
 import com.example.vrnandr.kpiwatcher.repository.database.Kpi
 import com.example.vrnandr.kpiwatcher.repository.database.KpiDatabase
 import com.example.vrnandr.kpiwatcher.repository.network.Api
-import com.example.vrnandr.kpiwatcher.utility.*
+import com.example.vrnandr.kpiwatcher.utility.SingleLiveEvent
+import com.example.vrnandr.kpiwatcher.utility.notify
 import kotlinx.coroutines.*
 import org.jsoup.Jsoup
 import retrofit2.Call
@@ -66,7 +68,7 @@ class Repository private constructor(val context: Context) {
         return spCredentials.getString(LOGIN,null)
     }
 
-    val liveDataCurrentKPI = dao.getLiveDataCurrentKPI(getLogin()?:"")
+    //val liveDataCurrentKPI = dao.getLiveDataCurrentKPI(getLogin()?:"")
     suspend fun currentKPI() = dao.getCurrentKPI(getLogin()?:"")
     suspend fun addKpi(kpi:Kpi) = dao.addKPI(kpi)
 
@@ -154,6 +156,10 @@ class Repository private constructor(val context: Context) {
     val responseKPE: LiveData<String>
         get() = _responseKPE
 
+    private val _currentKPI = MutableLiveData<Kpi?>()
+    val currentKPI: LiveData<Kpi?>
+        get() = _currentKPI
+
     init {
         _responseKPE.value = getAbout()?:""
     }
@@ -170,6 +176,13 @@ class Repository private constructor(val context: Context) {
 
 
     private var _csrf:String =""
+
+    fun getCurrentKPI(){
+        _currentKPI.postValue(null)
+        CoroutineScope(Dispatchers.IO).launch {
+            _currentKPI.postValue(dao.getCurrentKPI(getLogin()?:""))
+        }
+    }
 
     fun openLoginPage(login: String, password: String) {
         clearCookies()
@@ -272,6 +285,26 @@ class Repository private constructor(val context: Context) {
                                             kpiString += "${data[i]} ${color[i]} ${names[i]}:"
                                         kpiString = kpiString.dropLast(1)
 
+
+
+
+                                        /*val savedKPIString = withContext(CoroutineScope(Dispatchers.IO).coroutineContext) { currentKPI()?.kpi }
+
+                                        //val savedKPIString = job.await()
+                                            //Timber.d("onResponse: $kpiString :::: $savedKPIString")
+                                            if (savedKPIString != kpiString && kpiString.isNotEmpty()) {
+                                                Timber.d("onResponse: insert kpi and notify user")
+                                                notify(context, kpiString)
+                                                val kpi = Kpi(System.currentTimeMillis(), login, kpiString)
+                                                CoroutineScope(Dispatchers.IO).launch { addKpi(kpi) }
+                                            } else{
+                                                _showToastEvent.value = context.getString(R.string.kpi_didnt_change)
+                                                Timber.d("onResponse: kpi equals, not insert")
+                                            }*/
+
+
+
+
                                         val job =  CoroutineScope(Dispatchers.IO).async { currentKPI()?.kpi }
                                         runBlocking {
                                             val savedKPIString = job.await()
@@ -280,8 +313,10 @@ class Repository private constructor(val context: Context) {
                                                 Timber.d("onResponse: insert kpi and notify user")
                                                 notify(context, kpiString)
                                                 val kpi = Kpi(System.currentTimeMillis(), login, kpiString)
-                                                CoroutineScope(Dispatchers.IO).launch { addKpi(kpi) }
-                                            } else{
+                                                addKpi(kpi)
+                                                getCurrentKPI()
+                                                //CoroutineScope(Dispatchers.IO).launch { addKpi(kpi) }
+                                            } else {
                                                 _showToastEvent.value = context.getString(R.string.kpi_didnt_change)
                                                 Timber.d("onResponse: kpi equals, not insert")
                                             }
