@@ -6,7 +6,6 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
-import android.util.TypedValue
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -15,7 +14,6 @@ import com.example.vrnandr.kpiwatcher.R
 import com.example.vrnandr.kpiwatcher.databinding.MainFragmentBinding
 import com.example.vrnandr.kpiwatcher.utility.ParsedKPI
 import com.example.vrnandr.kpiwatcher.utility.convertKPI
-import com.google.android.material.color.MaterialColors
 import timber.log.Timber
 
 class MainFragment : Fragment() {

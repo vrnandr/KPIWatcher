@@ -3,7 +3,6 @@ package com.example.vrnandr.kpiwatcher.repository
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.preference.PreferenceManager
 import com.example.vrnandr.kpiwatcher.R
