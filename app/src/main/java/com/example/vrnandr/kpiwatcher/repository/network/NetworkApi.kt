@@ -33,6 +33,7 @@ interface NetworkApi {
     @GET("index.php?r=site%2Fdashboard")
     //@GET ("kpi100")
     //@GET ("kpi")
+    //@GET ("blank")
     fun dashboard():Call<String>
 
     @Headers("Content-Type: application/x-www-form-urlencoded")

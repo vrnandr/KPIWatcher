@@ -3,6 +3,7 @@ package com.example.vrnandr.kpiwatcher.ui.main
 import android.graphics.Color
 import androidx.lifecycle.ViewModel
 import com.example.vrnandr.kpiwatcher.repository.Repository
+import com.example.vrnandr.kpiwatcher.repository.database.Kpi
 import com.example.vrnandr.kpiwatcher.utility.convertKPI
 import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.data.Entry
@@ -13,7 +14,6 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 class DetailViewModel :ViewModel() {
 
@@ -24,8 +24,9 @@ class DetailViewModel :ViewModel() {
 
     fun getData(): LineData = runBlocking{
 
-        val result = async { repo.userKPI() }
-        val list = result.await()
+        //val result = async { repo.userKPI() }
+        val list =
+            withContext(Dispatchers.IO) { repo.userKPI() }
 
         if (list.isNotEmpty()){
 
@@ -66,9 +67,26 @@ class DetailViewModel :ViewModel() {
         repo.setChartKPI(chartKPI)
     }
 
+    fun addData(){
+        runBlocking {
+            repo.addKpi(Kpi(1627643639391, "0000001091","100 green Итоговый коэффициент:100 green Добросовестность:88.6973 green Загруженность:99.867 green Комплексный показатель:95.7447 red Своевременность:78.7234 green Оперативность:100 green Качество работы:100 green Удовлетворенность:100 green Своевременность ППР"))
+            repo.addKpi(Kpi(1627543639391, "0000001091","100 green Итоговый коэффициент:100 green Добросовестность:88.6973 green Загруженность:99.867 green Комплексный показатель:95.7447 red Своевременность:78.7234 green Оперативность:100 green Качество работы:100 green Удовлетворенность:100 green Своевременность ППР"))
+            repo.addKpi(Kpi(1627443639391, "0000001091","100 green Итоговый коэффициент:100 green Добросовестность:88.6973 green Загруженность:99.867 green Комплексный показатель:95.7447 red Своевременность:78.7234 green Оперативность:100 green Качество работы:100 green Удовлетворенность:100 green Своевременность ППР"))
+            repo.addKpi(Kpi(1627343639391, "0000001091","100 green Итоговый коэффициент:100 green Добросовестность:88.6973 green Загруженность:99.867 green Комплексный показатель:95.7447 red Своевременность:78.7234 green Оперативность:100 green Качество работы:100 green Удовлетворенность:100 green Своевременность ППР"))
+            repo.addKpi(Kpi(1627243639391, "0000001091","85 green Итоговый коэффициент:100 green Добросовестность:78.6973 green Загруженность:99.867 green Комплексный показатель:95.7447 red Своевременность:78.7234 green Оперативность:100 green Качество работы:100 green Удовлетворенность:100 green Своевременность ППР"))
+            repo.addKpi(Kpi(1627143639391, "0000001091","85 green Итоговый коэффициент:100 green Добросовестность:68.6973 green Загруженность:99.867 green Комплексный показатель:95.7447 red Своевременность:78.7234 green Оперативность:100 green Качество работы:100 green Удовлетворенность:100 green Своевременность ППР"))
+            repo.addKpi(Kpi(1627043639391, "0000001091","70 green Итоговый коэффициент:100 green Добросовестность:58.6973 green Загруженность:99.867 green Комплексный показатель:95.7447 red Своевременность:78.7234 green Оперативность:100 green Качество работы:100 green Удовлетворенность:100 green Своевременность ППР"))
+            repo.addKpi(Kpi(1626943639391, "0000001091","70 green Итоговый коэффициент:100 green Добросовестность:58.6973 green Загруженность:99.867 green Комплексный показатель:95.7447 red Своевременность:78.7234 green Оперативность:100 green Качество работы:100 green Удовлетворенность:100 green Своевременность ППР"))
+            repo.addKpi(Kpi(1626843639391, "0000001091","85 green Итоговый коэффициент:100 green Добросовестность:65.6973 green Загруженность:99.867 green Комплексный показатель:95.7447 red Своевременность:78.7234 green Оперативность:100 green Качество работы:100 green Удовлетворенность:100 green Своевременность ППР"))
+            repo.addKpi(Kpi(1626743639391, "0000001091","70 green Итоговый коэффициент:100 green Добросовестность:50.6973 green Загруженность:99.867 green Комплексный показатель:95.7447 red Своевременность:78.7234 green Оперативность:100 green Качество работы:100 green Удовлетворенность:100 green Своевременность ППР"))
+            repo.addKpi(Kpi(1626643639391, "0000001091","85 green Итоговый коэффициент:100 green Добросовестность:75.6973 green Загруженность:99.867 green Комплексный показатель:95.7447 red Своевременность:78.7234 green Оперативность:100 green Качество работы:100 green Удовлетворенность:100 green Своевременность ППР"))
+            repo.addKpi(Kpi(1626543639391, "0000001091","85 green Итоговый коэффициент:100 green Добросовестность:70.6973 green Загруженность:99.867 green Комплексный показатель:95.7447 red Своевременность:78.7234 green Оперативность:100 green Качество работы:100 green Удовлетворенность:100 green Своевременность ППР"))
+        }
+    }
+
     class MyXAxisFormatter: ValueFormatter(){
         override fun getAxisLabel(value: Float, axis: AxisBase?): String {
-            return SimpleDateFormat("dd-MM HH:mm", Locale.getDefault()).format(Date(value.toLong()))
+            return SimpleDateFormat("dd-MM", Locale.getDefault()).format(Date(value.toLong()))
         }
     }
 }
