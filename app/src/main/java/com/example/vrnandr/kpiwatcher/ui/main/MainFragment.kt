@@ -36,7 +36,7 @@ class MainFragment : Fragment() {
                     binding.message.text = kpiToColoredText(parsedKPI)
                 }
             } else
-                binding.message.text = "..."
+                binding.message.text = ""
         })
         viewModel.successKPIRequestEvent.observe(viewLifecycleOwner, { hideProgressBar() })
 

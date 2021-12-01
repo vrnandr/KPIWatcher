@@ -15,6 +15,7 @@
     <string name="min_timer">15</string>
     <string name="periodic_timer">60</string>
     <string name="kpi_didnt_change">КПЭ не изменились</string>
+    <string name="kpi_not_found">КПЭ не найдены</string>
     <!-- Preference -->
     <string name="kpi_header">КПЭ</string>
     <string name="log_header">Лог файл</string>
