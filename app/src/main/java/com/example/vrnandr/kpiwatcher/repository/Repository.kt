@@ -27,7 +27,7 @@ private const val LOGIN_SUCCESSFUL = "Выйти"
 private const val LOGIN_WORD = "Вход"
 private const val INFOTRANS = "ОСК \"ИнфоТранс\""
 private const val LOGIN_FAILURE = "Incorrect username or password"
-private const val KPI_NOT_FOUND ="КПЭ не найдены"
+private const val KPI_NOT_FOUND ="КПЭ не найден"
 
 private const val CREDENTIALS = "credentials"
 private const val ENABLE_LOGGING = "enable_logging"
@@ -326,7 +326,8 @@ class Repository private constructor(val context: Context) {
                                     setAbout("$who\n$about")
                                 } else {
                                     _successKPIRequestEvent.postValue(true)
-                                    _responseKPE.value = "$who\n$about\n$KPI_NOT_FOUND"
+                                    _responseKPE.value = "$who\n$about"
+                                    _currentKPI.postValue(null)
                                     setAbout("$who\n$about\n$KPI_NOT_FOUND")
                                 }
 
