@@ -71,7 +71,6 @@ class Repository private constructor(val context: Context) {
     suspend fun currentKPI() = dao.getCurrentKPI(getLogin()?:"")
     suspend fun addKpi(kpi:Kpi) = dao.addKPI(kpi)
 
-
     suspend fun userKPI():List<Kpi> {
         //timestamp начала месяца, чтобы запросить данные за текущий месяц
         val cal = Calendar.getInstance().apply {
@@ -83,7 +82,6 @@ class Repository private constructor(val context: Context) {
         }
          return dao.getKPI(getLogin()?:"0000000000",cal.timeInMillis)
     }
-
 
     private fun clearCookies() {
         networkApi.clearCookies()
@@ -163,7 +161,6 @@ class Repository private constructor(val context: Context) {
         _responseKPE.value = getAbout()?:""
     }
 
-
     private val _successLoginEvent = SingleLiveEvent<Boolean>()
     val successLoginEvent: LiveData<Boolean>
         get() = _successLoginEvent
@@ -172,7 +169,6 @@ class Repository private constructor(val context: Context) {
     private val _successKPIRequestEvent = SingleLiveEvent<Boolean>()
     val successKPIRequestEvent: LiveData<Boolean>
         get() = _successKPIRequestEvent
-
 
     private var _csrf:String =""
 
@@ -188,7 +184,6 @@ class Repository private constructor(val context: Context) {
         clearCookies()
         deleteCredentials()
         _responseKPE.value = ""
-        //liveDataCurrentKPI.value = Kpi(System.currentTimeMillis(),"000","")
         networkApi.retrofitService.login().enqueue(object : Callback<String> {
             override fun onFailure(call: Call<String>, t: Throwable) {
                 _showErrorToastEvent.value = "Failure on open login page: ${t.localizedMessage}"
@@ -273,6 +268,8 @@ class Repository private constructor(val context: Context) {
                                 val doc = Jsoup.parse(it)
                                 val who = doc.select("h1.hyphens+p").first().text()
                                 val about = doc.select("h1.hyphens+p").next().text()
+                                setAbout("$who\n$about")
+
                                 if (!result.contains(KPI_NOT_FOUND)) {
                                     val elements = doc.select("div.circle-chart")
                                     val data = elements.eachAttr("data-value")
@@ -284,26 +281,6 @@ class Repository private constructor(val context: Context) {
                                             kpiString += "${data[i]} ${color[i]} ${names[i]}:"
                                         kpiString = kpiString.dropLast(1)
 
-
-
-
-                                        /*val savedKPIString = withContext(CoroutineScope(Dispatchers.IO).coroutineContext) { currentKPI()?.kpi }
-
-                                        //val savedKPIString = job.await()
-                                            //Timber.d("onResponse: $kpiString :::: $savedKPIString")
-                                            if (savedKPIString != kpiString && kpiString.isNotEmpty()) {
-                                                Timber.d("onResponse: insert kpi and notify user")
-                                                notify(context, kpiString)
-                                                val kpi = Kpi(System.currentTimeMillis(), login, kpiString)
-                                                CoroutineScope(Dispatchers.IO).launch { addKpi(kpi) }
-                                            } else{
-                                                _showToastEvent.value = context.getString(R.string.kpi_didnt_change)
-                                                Timber.d("onResponse: kpi equals, not insert")
-                                            }*/
-
-
-
-
                                         val job =  CoroutineScope(Dispatchers.IO).async { currentKPI()?.kpi }
                                         runBlocking {
                                             val savedKPIString = job.await()
@@ -314,7 +291,6 @@ class Repository private constructor(val context: Context) {
                                                 val kpi = Kpi(System.currentTimeMillis(), login, kpiString)
                                                 addKpi(kpi)
                                                 getCurrentKPI()
-                                                //CoroutineScope(Dispatchers.IO).launch { addKpi(kpi) }
                                             } else {
                                                 _showToastEvent.value = context.getString(R.string.kpi_didnt_change)
                                                 Timber.d("onResponse: kpi equals, not insert")
@@ -328,17 +304,11 @@ class Repository private constructor(val context: Context) {
                                 }
                                 _successKPIRequestEvent.postValue(true)
                                 _responseKPE.value = "$who\n$about"
-                                setAbout("$who\n$about")
-
                                 success = true
                             } catch (e: Exception) {
                                 _successKPIRequestEvent.postValue(false)
                                 Timber.e("onResponse: Error on parse HTML: ${e.localizedMessage}")
                                 _showErrorToastEvent.value = "Error on parse HTML: ${e.localizedMessage}"
-                                /*if (reopenLoginPage) {
-                                    reopenLoginPage = false
-                                    openLoginPage(login,password)
-                                }*/
                             }
                         }
                     } else {
@@ -365,5 +335,4 @@ class Repository private constructor(val context: Context) {
         return success
     }
     //------->
-
 }
