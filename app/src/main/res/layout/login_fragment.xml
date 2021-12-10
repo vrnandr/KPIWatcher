@@ -17,7 +17,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             tools:context=".ui.main.LoginFragment">
 
 
@@ -41,20 +41,23 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/loginEditText"
-                android:autofillHints="" />
+                android:autofillHints=""
+                android:hint="@string/password_editText_hint"
+                tools:ignore="TextFields" />
 
             <EditText
                 android:id="@+id/loginEditText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:autofillHints=""
                 android:ems="10"
                 android:inputType="textPersonName"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.35000002"
-                android:autofillHints="" />
+                app:layout_constraintVertical_bias="0.35"
+                android:hint="@string/login_editText_hint"/>
 
             <TextView
                 android:id="@+id/textView4"
@@ -82,6 +85,26 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/loginHintButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                app:layout_constraintStart_toEndOf="@+id/textView4"
+                app:layout_constraintTop_toTopOf="@+id/textView4"
+                app:srcCompat="@drawable/ic_hint"
+                android:contentDescription="@string/login_hint" />
+
+            <ImageView
+                android:id="@+id/passwordHintButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                app:layout_constraintStart_toEndOf="@+id/textView5"
+                app:layout_constraintTop_toTopOf="@+id/textView5"
+                app:srcCompat="@drawable/ic_hint"
+                android:contentDescription="@string/password_hint" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -39,4 +39,9 @@
     <string name="incorrect_login_data">Данные для входа не корректны</string>
     <string name="detail_fragment_settings">настройки</string>
     <string name="detail_fragment_settings_title">Настройки графика</string>
+    <!--хинты в login fragment-->
+    <string name="login_hint">Табельный номер полностью, включая начальные нули</string>
+    <string name="password_hint">ФИО полностью, без учета регистра, пробелов</string>
+    <string name="login_editText_hint">0123456789</string>
+    <string name="password_editText_hint">Иванов Иван Иванович</string>
 </resources>

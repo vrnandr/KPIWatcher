@@ -1,5 +1,6 @@
 package com.example.vrnandr.kpiwatcher.ui.main
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,11 +10,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.vrnandr.kpiwatcher.R
 import com.example.vrnandr.kpiwatcher.databinding.LoginFragmentBinding
+import com.skydoves.balloon.*
 import java.util.*
 
 class LoginFragment : Fragment() {
 
     private lateinit var binding: LoginFragmentBinding
+    private lateinit var loginHint: Balloon
+    private lateinit var passwordHint: Balloon
     private val viewModel: LoginViewModel by lazy { ViewModelProvider(this).get(LoginViewModel::class.java) }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -33,6 +37,45 @@ class LoginFragment : Fragment() {
 
         })
 
+        loginHint = createBalloon(requireContext()) {
+            setArrowSize(10)
+            setWidth(190)
+            setHeight(50)
+            setArrowPosition(0.5f)
+            setArrowPositionRules(ArrowPositionRules.ALIGN_ANCHOR)
+            setCornerRadius(4f)
+            setAlpha(0.9f)
+            setText(resources.getString(R.string.login_hint))
+            setTextColor(Color.DKGRAY)
+            //setTextIsHtml(true)
+            setBackgroundColorResource(R.color.teal_200)
+            //setOnBalloonClickListener(onBalloonClickListener)
+            setOnBalloonOutsideTouchListener { _, _ ->  loginHint.dismiss()}
+            setBalloonAnimation(BalloonAnimation.FADE)
+            setLifecycleOwner(lifecycleOwner)
+            setAutoDismissDuration(3000L)
+        }
+
+        passwordHint = createBalloon(requireContext()) {
+            setArrowSize(10)
+            setWidth(170)
+            setHeight(50)
+            setArrowPosition(0.5f)
+            setArrowPositionRules(ArrowPositionRules.ALIGN_ANCHOR)
+            setCornerRadius(4f)
+            setAlpha(0.9f)
+            setText(resources.getString(R.string.password_hint))
+            setTextColor(Color.DKGRAY)
+            //setTextIsHtml(true)
+            setBackgroundColorResource(R.color.teal_200)
+            //setOnBalloonClickListener(onBalloonClickListener)
+            setOnBalloonOutsideTouchListener { _, _ ->  passwordHint.dismiss()}
+            setBalloonAnimation(BalloonAnimation.FADE)
+            setLifecycleOwner(lifecycleOwner)
+            setAutoDismissDuration(3000L)
+        }
+
+
         return binding.root
     }
 
@@ -50,6 +93,13 @@ class LoginFragment : Fragment() {
             viewModel.login(login,password)
 
         }
+        binding.loginHintButton.setOnClickListener {
+            loginHint.showAlignTop(it)
+        }
+        binding.passwordHintButton.setOnClickListener {
+            passwordHint.showAlignTop(it)
+        }
+
         super.onStart()
     }
 }
