@@ -3,7 +3,6 @@ package com.example.vrnandr.kpiwatcher.repository
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.preference.PreferenceManager
 import com.example.vrnandr.kpiwatcher.R
@@ -72,7 +71,6 @@ class Repository private constructor(val context: Context) {
     suspend fun currentKPI() = dao.getCurrentKPI(getLogin()?:"")
     suspend fun addKpi(kpi:Kpi) = dao.addKPI(kpi)
 
-
     suspend fun userKPI():List<Kpi> {
         //timestamp начала месяца, чтобы запросить данные за текущий месяц
         val cal = Calendar.getInstance().apply {
@@ -84,7 +82,6 @@ class Repository private constructor(val context: Context) {
         }
          return dao.getKPI(getLogin()?:"0000000000",cal.timeInMillis)
     }
-
 
     private fun clearCookies() {
         networkApi.clearCookies()
@@ -164,7 +161,6 @@ class Repository private constructor(val context: Context) {
         _responseKPE.value = getAbout()?:""
     }
 
-
     private val _successLoginEvent = SingleLiveEvent<Boolean>()
     val successLoginEvent: LiveData<Boolean>
         get() = _successLoginEvent
@@ -174,26 +170,25 @@ class Repository private constructor(val context: Context) {
     val successKPIRequestEvent: LiveData<Boolean>
         get() = _successKPIRequestEvent
 
-
     private var _csrf:String =""
 
     fun getCurrentKPI(){
         _currentKPI.postValue(null)
-        CoroutineScope(Dispatchers.IO).launch {
-            _currentKPI.postValue(dao.getCurrentKPI(getLogin()?:""))
-        }
+        if (getAbout()?.contains(KPI_NOT_FOUND) == false)
+            CoroutineScope(Dispatchers.IO).launch {
+                _currentKPI.postValue(dao.getCurrentKPI(getLogin()?:""))
+            }
     }
 
     fun openLoginPage(login: String, password: String) {
         clearCookies()
         deleteCredentials()
         _responseKPE.value = ""
-        //liveDataCurrentKPI.value = Kpi(System.currentTimeMillis(),"000","")
         networkApi.retrofitService.login().enqueue(object : Callback<String> {
             override fun onFailure(call: Call<String>, t: Throwable) {
-                _showErrorToastEvent.value = "Failure on open login page: ${t.message}"
+                _showErrorToastEvent.value = "Failure on open login page: ${t.localizedMessage}"
                 _successLoginEvent.value = false
-                Timber.d("Failure on open login page: ${t.message}")
+                Timber.d("Failure on open login page: ${t.localizedMessage}")
             }
 
             override fun onResponse(call: Call<String>, response: Response<String>) {
@@ -211,7 +206,7 @@ class Repository private constructor(val context: Context) {
                     } catch (e:Exception){
                         _showErrorToastEvent.value = "Error on parse login page HTML: ${e.localizedMessage}"
                         _successLoginEvent.value = false
-                        Timber.d("Error on parse login page HTML: ${e.message}")
+                        Timber.d("Error on parse login page HTML: ${e.localizedMessage}")
                     }
                 }
             }
@@ -222,9 +217,9 @@ class Repository private constructor(val context: Context) {
         networkApi.retrofitService.loginrequest(_csrf, login, password,"1").enqueue(object :
                 Callback<String> {
             override fun onFailure(call: Call<String>, t: Throwable) {
-                _showErrorToastEvent.value = "Failure on login: ${t.message}"
+                _showErrorToastEvent.value = "Failure on login: ${t.localizedMessage}"
                 _successLoginEvent.value = false
-                Timber.d("Failure on login: ${t.message}")
+                Timber.d("Failure on login: ${t.localizedMessage}")
             }
 
             override fun onResponse(call: Call<String>, response: Response<String>) {
@@ -273,8 +268,9 @@ class Repository private constructor(val context: Context) {
                                 val doc = Jsoup.parse(it)
                                 val who = doc.select("h1.hyphens+p").first().text()
                                 val about = doc.select("h1.hyphens+p").next().text()
+                                setAbout("$who\n$about")
+
                                 if (!result.contains(KPI_NOT_FOUND)) {
-                                    _successKPIRequestEvent.postValue(true)
                                     val elements = doc.select("div.circle-chart")
                                     val data = elements.eachAttr("data-value")
                                     val color = elements.eachAttr("data-color")
@@ -284,26 +280,6 @@ class Repository private constructor(val context: Context) {
                                         for (i in 0 until data.count())
                                             kpiString += "${data[i]} ${color[i]} ${names[i]}:"
                                         kpiString = kpiString.dropLast(1)
-
-
-
-
-                                        /*val savedKPIString = withContext(CoroutineScope(Dispatchers.IO).coroutineContext) { currentKPI()?.kpi }
-
-                                        //val savedKPIString = job.await()
-                                            //Timber.d("onResponse: $kpiString :::: $savedKPIString")
-                                            if (savedKPIString != kpiString && kpiString.isNotEmpty()) {
-                                                Timber.d("onResponse: insert kpi and notify user")
-                                                notify(context, kpiString)
-                                                val kpi = Kpi(System.currentTimeMillis(), login, kpiString)
-                                                CoroutineScope(Dispatchers.IO).launch { addKpi(kpi) }
-                                            } else{
-                                                _showToastEvent.value = context.getString(R.string.kpi_didnt_change)
-                                                Timber.d("onResponse: kpi equals, not insert")
-                                            }*/
-
-
-
 
                                         val job =  CoroutineScope(Dispatchers.IO).async { currentKPI()?.kpi }
                                         runBlocking {
@@ -315,31 +291,24 @@ class Repository private constructor(val context: Context) {
                                                 val kpi = Kpi(System.currentTimeMillis(), login, kpiString)
                                                 addKpi(kpi)
                                                 getCurrentKPI()
-                                                //CoroutineScope(Dispatchers.IO).launch { addKpi(kpi) }
                                             } else {
                                                 _showToastEvent.value = context.getString(R.string.kpi_didnt_change)
                                                 Timber.d("onResponse: kpi equals, not insert")
                                             }
                                         }
                                     }
-                                    _responseKPE.value = "$who\n$about"
-                                    setAbout("$who\n$about")
                                 } else {
-                                    _successKPIRequestEvent.postValue(true)
-                                    _responseKPE.value = "$who\n$about"
                                     _currentKPI.postValue(null)
-                                    setAbout("$who\n$about\n$KPI_NOT_FOUND")
+                                    _showToastEvent.value = context.getString(R.string.kpi_not_found)
+                                    Timber.d("onResponse: kpi not found")
                                 }
-
+                                _successKPIRequestEvent.postValue(true)
+                                _responseKPE.value = "$who\n$about"
                                 success = true
                             } catch (e: Exception) {
                                 _successKPIRequestEvent.postValue(false)
-                                Timber.e("onResponse: Error on parse HTML: ${e.message}")
-                                _showErrorToastEvent.value = "Error on parse HTML: ${e.message}"
-                                /*if (reopenLoginPage) {
-                                    reopenLoginPage = false
-                                    openLoginPage(login,password)
-                                }*/
+                                Timber.e("onResponse: Error on parse HTML: ${e.localizedMessage}")
+                                _showErrorToastEvent.value = "Error on parse HTML: ${e.localizedMessage}"
                             }
                         }
                     } else {
@@ -366,5 +335,4 @@ class Repository private constructor(val context: Context) {
         return success
     }
     //------->
-
 }

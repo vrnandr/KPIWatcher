@@ -10,7 +10,6 @@ import com.example.vrnandr.kpiwatcher.R
 import com.example.vrnandr.kpiwatcher.databinding.DetailFragmentBinding
 import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.LegendEntry
-import timber.log.Timber
 
 const val ALL_KPI_LIST = "all_kpi_list"
 const val VISIBLE_KPI_LIST = "visible_kpi_list"

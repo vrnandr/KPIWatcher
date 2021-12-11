@@ -19,10 +19,6 @@ class MainViewModel: ViewModel() {
         repo.getCurrentKPI()
     }
 
-    fun getCurrentKPI(){
-        repo.getCurrentKPI()
-    }
-
     fun onKPIButtonClick (){
        repo.kpiRequest()
     }
