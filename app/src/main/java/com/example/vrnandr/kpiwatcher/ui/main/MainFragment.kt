@@ -68,6 +68,9 @@ class MainFragment : Fragment() {
             showProgressBar()
             viewModel.onKPIButtonClick()
         }
+        binding.message.setOnClickListener {
+            showDetail()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -77,6 +80,10 @@ class MainFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId){
+            R.id.settings ->{
+                findNavController().navigate(R.id.action_mainFragment_to_settingsFragment)
+                true
+            }
             R.id.logout -> {
                 viewModel.deleteCredentials()
                 binding.message.text = ""
@@ -86,6 +93,10 @@ class MainFragment : Fragment() {
             }
             else -> return super.onOptionsItemSelected(item)
         }
+    }
+
+    fun showDetail(){
+        findNavController().navigate(R.id.action_mainFragment_to_detailFragment)
     }
 
     private fun showProgressBar(){

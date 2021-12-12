@@ -34,13 +34,13 @@ class MainActivity : AppCompatActivity() {
         showErrorToastEvent.observe(this,{ showToast(it) })
         showToastEvent.observe(this,{ showToast(it) })
 
-        val navView: BottomNavigationView = findViewById(R.id.nav_view)
+        //val navView: BottomNavigationView = findViewById(R.id.nav_view)
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
         val appBarConfiguration = AppBarConfiguration(setOf(
                 R.id.detailFragment, R.id.mainFragment, R.id.settingsFragment))
         setupActionBarWithNavController(navController, appBarConfiguration)
-        navView.setupWithNavController(navController)
+        //navView.setupWithNavController(navController)
 
         if (savedInstanceState == null) {
             if (repo.getLogin() == null)
@@ -57,11 +57,11 @@ class MainActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             if(destination.id == R.id.loginFragment) {
-                navView.visibility = View.GONE
+                //navView.visibility = View.GONE
                 supportActionBar?.setShowHideAnimationEnabled(false)
                 supportActionBar?.hide()
             } else {
-                navView.visibility = View.VISIBLE
+                //navView.visibility = View.VISIBLE
                 supportActionBar?.setShowHideAnimationEnabled(true)
                 supportActionBar?.show()
             }
