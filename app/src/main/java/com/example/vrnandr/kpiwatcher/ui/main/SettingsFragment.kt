@@ -99,17 +99,19 @@ class SettingsFragment : PreferenceFragmentCompat() {
             }
         }
 //если нет дерева MyFileLogger и стоит галочка логировать, то включаем лог в файл, если галочки нет то выключаем логирование в файл
-        if (enableLogging.isChecked)
+        if (enableLogging.isChecked){
             if (Timber.forest().find { it.javaClass == MyFileLoggerTree::class.java } == null) {
                 Timber.plant(MyFileLoggerTree())
                 Timber.d("logging on")
-            } else
-                Timber.forest().forEach {
-                    if (it.javaClass == MyFileLoggerTree::class.java) {
-                        Timber.d("logging off")
-                        Timber.uproot(it)
-                    }
+            }
+        } else {
+            Timber.forest().forEach {
+                if (it.javaClass == MyFileLoggerTree::class.java) {
+                    Timber.d("logging off")
+                    Timber.uproot(it)
                 }
+            }
+        }
     }
 
 
