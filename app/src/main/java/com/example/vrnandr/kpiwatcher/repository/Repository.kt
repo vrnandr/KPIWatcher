@@ -23,8 +23,7 @@ import java.util.*
 private const val LOGIN = "login"
 private const val PASSWORD = "password"
 private const val LOGIN_SUCCESSFUL = "Выйти"
-private const val LOGIN_WORD = "Вход"
-private const val INFOTRANS = "ОСК \"ИнфоТранс\""
+private const val LOGIN_PROMPT = "Пожалуйста, заполните следующие поля для входа:"
 private const val LOGIN_FAILURE = "Incorrect username or password"
 private const val KPI_NOT_FOUND ="КПЭ не найден"
 
@@ -258,57 +257,57 @@ class Repository private constructor(val context: Context) {
                     if (response.isSuccessful) {
                         val result: String? = response.body()
                         result?.let {
-                            try {
-                                //если в теле ответа есть текст `Вход` и `ОСК "ИнфоТранс"` значит что-то пошло не так и надо снова выполнить логин, если нет парсим страницу
-                                if (result.contains(LOGIN_WORD)&&result.contains(INFOTRANS)){
-                                    _successKPIRequestEvent.postValue(false)
-                                    openLoginPage(login,password)
-                                }
+                            //если в теле ответа есть приглашение ввода пароля релогинимся
+                            if (result.contains(LOGIN_PROMPT)){
+                                _successKPIRequestEvent.postValue(false)
+                                openLoginPage(login,password)
+                            } else {
+                                try {
+                                    val doc = Jsoup.parse(it)
+                                    val who = doc.select("h1.hyphens+p").first().text()
+                                    val about = doc.select("h1.hyphens+p").next().text()
+                                    setAbout("$who\n$about")
 
-                                val doc = Jsoup.parse(it)
-                                val who = doc.select("h1.hyphens+p").first().text()
-                                val about = doc.select("h1.hyphens+p").next().text()
-                                setAbout("$who\n$about")
+                                    if (!result.contains(KPI_NOT_FOUND)) {
+                                        val elements = doc.select("div.circle-chart")
+                                        val data = elements.eachAttr("data-value")
+                                        val color = elements.eachAttr("data-color")
+                                        val names = elements.next().eachText()
+                                        if (data.count() == names.count() && names.count() == color.count()) {
+                                            var kpiString = ""
+                                            for (i in 0 until data.count())
+                                                kpiString += "${data[i]} ${color[i]} ${names[i]}:"
+                                            kpiString = kpiString.dropLast(1)
 
-                                if (!result.contains(KPI_NOT_FOUND)) {
-                                    val elements = doc.select("div.circle-chart")
-                                    val data = elements.eachAttr("data-value")
-                                    val color = elements.eachAttr("data-color")
-                                    val names = elements.next().eachText()
-                                    if (data.count() == names.count() && names.count() == color.count()) {
-                                        var kpiString = ""
-                                        for (i in 0 until data.count())
-                                            kpiString += "${data[i]} ${color[i]} ${names[i]}:"
-                                        kpiString = kpiString.dropLast(1)
-
-                                        val job =  CoroutineScope(Dispatchers.IO).async { currentKPI()?.kpi }
-                                        runBlocking {
-                                            val savedKPIString = job.await()
-                                            //Timber.d("onResponse: $kpiString :::: $savedKPIString")
-                                            if (savedKPIString != kpiString && kpiString.isNotEmpty()) {
-                                                Timber.d("onResponse: insert kpi and notify user")
-                                                notify(context, kpiString)
-                                                val kpi = Kpi(System.currentTimeMillis(), login, kpiString)
-                                                addKpi(kpi)
-                                                getCurrentKPI()
-                                            } else {
-                                                _showToastEvent.value = context.getString(R.string.kpi_didnt_change)
-                                                Timber.d("onResponse: kpi equals, not insert")
+                                            val job = CoroutineScope(Dispatchers.IO).async { currentKPI()?.kpi }
+                                            runBlocking {
+                                                val savedKPIString = job.await()
+                                                //Timber.d("onResponse: $kpiString :::: $savedKPIString")
+                                                if (savedKPIString != kpiString && kpiString.isNotEmpty()) {
+                                                    Timber.d("onResponse: insert kpi and notify user")
+                                                    notify(context, kpiString)
+                                                    val kpi = Kpi(System.currentTimeMillis(), login, kpiString)
+                                                    addKpi(kpi)
+                                                    getCurrentKPI()
+                                                } else {
+                                                    _showToastEvent.value = context.getString(R.string.kpi_didnt_change)
+                                                    Timber.d("onResponse: kpi equals, not insert")
+                                                }
                                             }
                                         }
+                                    } else {
+                                        _currentKPI.postValue(null)
+                                        _showToastEvent.value = context.getString(R.string.kpi_not_found)
+                                        Timber.d("onResponse: kpi not found")
                                     }
-                                } else {
-                                    _currentKPI.postValue(null)
-                                    _showToastEvent.value = context.getString(R.string.kpi_not_found)
-                                    Timber.d("onResponse: kpi not found")
+                                    _successKPIRequestEvent.postValue(true)
+                                    _responseKPE.value = "$who\n$about"
+                                    success = true
+                                } catch (e: Exception) {
+                                    _successKPIRequestEvent.postValue(false)
+                                    Timber.e("onResponse: Error on parse HTML: ${e.localizedMessage}")
+                                    _showErrorToastEvent.value = "Error on parse HTML: ${e.localizedMessage}"
                                 }
-                                _successKPIRequestEvent.postValue(true)
-                                _responseKPE.value = "$who\n$about"
-                                success = true
-                            } catch (e: Exception) {
-                                _successKPIRequestEvent.postValue(false)
-                                Timber.e("onResponse: Error on parse HTML: ${e.localizedMessage}")
-                                _showErrorToastEvent.value = "Error on parse HTML: ${e.localizedMessage}"
                             }
                         }
                     } else {
